@@ -17,3 +17,10 @@ export const getUserById = async (id: string): Promise<IUser | null> => {
     const user = await User.findById(id);
     return user;
 };
+
+export const getUserByEmail = async (email:string) => {
+    const user = await User.findOne({email});
+    return user;
+}
+
+
