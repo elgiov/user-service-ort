@@ -10,7 +10,16 @@ export const createProduct = async ({ name, description, image, price, quantity 
     }
 };
 
+export const updateProduct = async ({ name, description, image, price, quantity }: IProduct) => {
+    try {
+        //TODO
+    } catch (error) {
+        throw new Error('Could not update the product');
+    }
+};
+
 export const getProductByName = async (name:string) => {
     const product = await Product.findOne({name});
     return product;
 }
+

@@ -4,6 +4,7 @@ import { createProduct, getProductByName } from '../services/productService';
 env.config();
 
 class ProductController {
+
     async addProduct(req: Request, res: Response): Promise<void> {
         try {
             const nameProduct = req.body.name
@@ -13,6 +14,16 @@ class ProductController {
             }
             await createProduct({ ...req.body });
             res.status(201).json({ message: 'Product added correctly' });
+        } catch (error) {
+            res.status(500).json({ message: 'Server error', error });
+        }
+    }
+
+    async updateProduct(req: Request, res: Response): Promise<void> {
+        try {
+            //TODO
+
+            res.status(200).json({ message: 'Product edited correctly' });
         } catch (error) {
             res.status(500).json({ message: 'Server error', error });
         }
