@@ -12,7 +12,7 @@ describe('createUser', () => {
             name: 'John Doe',
             email: 'johndoe155@example.com',
             password: 'password',
-            companyName: 'Acme Inc',
+            company: 'Acme Inc',
             role: UserRole.EMPLOYEE
         };
 
@@ -36,7 +36,7 @@ describe('getUserById', () => {
             name: 'John Doe',
             email: 'johndoe167@example.com',
             password: 'password',
-            companyName: 'Example Inc',
+            company: 'Example Inc',
             role: UserRole.EMPLOYEE
         };
 

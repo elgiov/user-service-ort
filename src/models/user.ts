@@ -11,7 +11,7 @@ export interface IUserInput extends Omit<Document, keyof Document> {
     name: string;
     email: string;
     password: string;
-    companyName: string;
+    company: string;
     role: UserRole;
 }
 
@@ -19,11 +19,16 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
-    companyName: string;
+    company: string;
     role: UserRole;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
+
+const isEmailValid = (email: string): boolean => validator.isEmail(email);
+
+const hashPassword = async (password: string): Promise<string> => {
+    const salt = await bcrypt.genSalt();
+    return bcrypt.hash(password, salt);
+};
 
 const userSchema = new Schema<IUser>(
     {
@@ -32,22 +37,21 @@ const userSchema = new Schema<IUser>(
             type: String,
             required: true,
             unique: true,
-            validate: [validator.isEmail, 'Invalid email']
+            validate: [isEmailValid, 'Invalid email']
         },
         password: { type: String, required: true },
-        companyName: { type: String, required: true },
+        company: { type: String, required: true },
         role: { type: String, required: true, enum: Object.values(UserRole) }
     },
     { timestamps: true }
 );
 
-userSchema.pre<IUser>('save', async function (next) {
+userSchema.pre('save', async function (this: IUser, next) {
     if (!this.isModified('password')) {
         return next();
     }
 
-    const salt = await bcrypt.genSalt();
-    this.password = await bcrypt.hash(this.password, salt);
+    this.password = await hashPassword(this.password);
     next();
 });
 

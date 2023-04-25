@@ -1,9 +1,9 @@
 import { User, IUser, IUserInput } from '../models/user';
 
-export const createUser = async ({ name, email, password, companyName, role }: IUserInput): Promise<IUser> => {
+export const createUser = async ({ name, email, password, company, role }: IUserInput): Promise<IUser> => {
     try {
         console.log('Creating user');
-        const newUser = new User({ name, email, password, companyName, role });
+        const newUser = new User({ name, email, password, company, role });
         console.log('User created in service');
         const user = await newUser.save();
         console.log('User saved in service');
