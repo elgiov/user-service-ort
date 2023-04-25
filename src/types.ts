@@ -9,7 +9,7 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
-    companyName: string;
+    company: string;
     role: UserRole;
 }
 
@@ -17,20 +17,20 @@ export interface RegisterAdminRequest {
     name: string;
     email: string;
     password: string;
-    companyName: string;
+    company: string;
 }
 
 export interface RegisterEmployeeRequest {
     name: string;
     email: string;
     password: string;
-    companyName: string;
+    company: string;
 }
 
 export interface CreateUserResponse {
     name: string;
     email: string;
-    companyName: string;
+    company: string;
     role: UserRole;
     _id?: string;
     message?: string; // extra property

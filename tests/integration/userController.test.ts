@@ -28,7 +28,7 @@ describe('POST /register/admin', () => {
             name: 'John Doe',
             email: 'johndoe12@example.com',
             password: 'password',
-            companyName: 'Acme Inc',
+            company: 'Acme Inc',
             role: UserRole.ADMIN
         };
 

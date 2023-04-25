@@ -11,13 +11,18 @@ export interface IProduct extends Document {
 
 export interface ProductDocument extends IProduct {}
 
-const productSchema = new Schema<IProduct>({
-    name: { type: String, required: true, unique: true },
-    description: { type: String, required: true },
-    image: { type: String, required: true },
-    price: { type: Number, required: true },
-    quantity: { type: Number, required: true },
-    deleted: { type: Boolean, default: false }
-});
+const productSchema = new Schema<IProduct>(
+    {
+        name: { type: String, required: true, unique: true },
+        description: { type: String, required: true },
+        image: { type: String, required: true },
+        price: { type: Number, required: true },
+        quantity: { type: Number, required: true },
+        deleted: { type: Boolean, default: false }
+    },
+    {
+        timestamps: true
+    }
+);
 
 export const Product = model<ProductDocument>('Product', productSchema);

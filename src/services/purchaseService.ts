@@ -3,22 +3,36 @@ import { IProduct } from '../models/product';
 import { Product } from '../models/product';
 import { Purchase } from '../models/purchase';
 
-export const createPurchase = async (date: Date, provider: string, products: { productId: string; quantity: number }[]): Promise<IPurchase> => {
+const findProductById = async (productId: string): Promise<IProduct> => {
+    const product = await Product.findById(productId);
+    if (!product) {
+        throw new Error(`Product with id "${productId}" not found`);
+    }
+    return product;
+};
+
+const calculateTotal = (products: { quantity: number; unitPrice: number }[]): number => {
+    return products.reduce((total, { quantity, unitPrice }) => total + unitPrice * quantity, 0);
+};
+
+export const createPurchase = async (provider: string, products: { productId: string; quantity: number }[]): Promise<IPurchase> => {
     try {
-        const purchaseProducts: { product: IProduct['_id']; quantity: number }[] = [];
-        let total = 0;
+        const productPromises = products.map(({ productId }) => findProductById(productId));
+        const foundProducts = await Promise.all(productPromises);
 
-        for (const { productId, quantity } of products) {
-            const product = await Product.findById(productId);
-            if (!product) {
-                throw new Error(`Product with id "${productId}" not found`);
-            }
+        const purchaseProducts = foundProducts.map((product, index) => {
+            const { quantity } = products[index];
+            return { product: product._id, quantity };
+        });
 
-            purchaseProducts.push({ product: product._id, quantity });
-            total += product.price * quantity;
-        }
+        const total = calculateTotal(
+            purchaseProducts.map((purchaseProduct, index) => ({
+                quantity: purchaseProduct.quantity,
+                unitPrice: foundProducts[index].price
+            }))
+        );
 
-        const purchase = new Purchase({ date, provider, products: purchaseProducts, total });
+        const purchase = new Purchase({ provider, products: purchaseProducts, total });
         await purchase.save();
 
         return purchase;

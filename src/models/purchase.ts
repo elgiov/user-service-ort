@@ -7,7 +7,6 @@ interface IPurchaseProduct {
 }
 
 export interface IPurchase extends Document {
-    date: Date;
     provider: string;
     products: IPurchaseProduct[];
     total: number;
@@ -18,11 +17,15 @@ const purchaseProductSchema = new Schema<IPurchaseProduct>({
     quantity: { type: Number, required: true }
 });
 
-const purchaseSchema = new Schema<IPurchase>({
-    date: { type: Date, required: true },
-    provider: { type: String, required: true },
-    products: { type: [purchaseProductSchema], required: true },
-    total: { type: Number, required: true }
-});
+const purchaseSchema = new Schema<IPurchase>(
+    {
+        provider: { type: String, required: true },
+        products: { type: [purchaseProductSchema], required: true },
+        total: { type: Number, required: true }
+    },
+    {
+        timestamps: true
+    }
+);
 
 export const Purchase = model<IPurchase>('Purchase', purchaseSchema);
