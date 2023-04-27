@@ -1,0 +1,46 @@
+import { Provider, IProvider } from '../models/provider';
+
+export const createProvider = async ({ name, address, email, phone }: IProvider): Promise<IProvider> => {
+    try {
+        const newProvider = new Provider({ name, address, email, phone });
+        const provider = await newProvider.save();
+        return provider;
+    } catch (error) {
+        throw new Error('Could not create a new provider');
+    }
+};
+
+export const updateProvider = async (providerId: string, updateProvider: IProvider): Promise<IProvider | null> => {
+    try {
+        const provider = await findProviderById(providerId);
+        if (!provider) {
+            return null;
+        }
+        const updatedProvider = await Provider.findOneAndUpdate({ _id: providerId }, { ...provider.toObject(), ...updateProvider }, { new: true });
+        return updatedProvider;
+    } catch (error: any) {
+        throw new Error(`Could not update provider with name "${name}": ${error.message}`);
+    }
+};
+
+export const deleteProvider = async (providerId: string): Promise<IProvider | null> => {
+    try {
+        const provider = await findProviderById(providerId);
+        if (!provider) {
+            return null;
+        }
+        const deletedProvider = await Provider.findOneAndUpdate({ _id: providerId }, { deleted: true }, { new: true });
+        return deletedProvider;
+    } catch (error: any) {
+        throw new Error(`Could not delete provider with id "${providerId}": ${error.message}`);
+    }
+};
+
+const findProviderById = async (providerId: string): Promise<IProvider> => {
+    const provider = await Provider.findById(providerId);
+    if (!provider) {
+        throw new Error(`Provider with id "${providerId}" not found`);
+    }
+    return provider;
+};
+
