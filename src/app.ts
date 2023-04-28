@@ -6,6 +6,7 @@ import purchaseRoutes from './routes/purchaseRoutes';
 import saleRoutes from './routes/saleRoutes';
 import { errorHandler } from './middlewares/errorHandler';
 import providerRoutes from './routes/providerRoutes';
+import companyRoutes from './routes/companyRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,6 +27,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/providers', providerRoutes);
+app.use('/api/companies', companyRoutes);
+
 
 
 // Connect to the MongoDB database

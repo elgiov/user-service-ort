@@ -1,27 +1,30 @@
 import { Schema, model, Document } from 'mongoose';
 import { IProduct } from './product';
+import { ICompany } from './company';
 
 export interface ISale extends Document {
-    company: string;
-    amount: number;
+    company: ICompany['_id'];
     products: {
-        productId: IProduct['_id'];
+        product: IProduct['_id'];
         quantity: number;
         unitPrice: number;
     }[];
+    total: number;
+    date: Date;
 }
 
 const SaleSchema = new Schema<ISale>(
     {
-        company: { type: String, required: true },
-        amount: { type: Number, required: true },
+        company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
         products: [
             {
-                productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+                product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
                 quantity: { type: Number, required: true },
                 unitPrice: { type: Number, required: true }
             }
-        ]
+        ],
+        total: { type: Number, required: true },
+        date: { type: Date, required: true }
     },
     {
         timestamps: true
