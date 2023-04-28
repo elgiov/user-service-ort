@@ -9,7 +9,9 @@ env.config();
 class ProductController {
     async addProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { name, company } = req.body;
+            const { name, company } = req.body.json;
+            console.log(name)
+            let name2 = req.body.json.name
             const product = await productService.getProduct(name, company);
 
             if (product) {
@@ -24,7 +26,8 @@ class ProductController {
 
             const { buffer, originalname } = file;
             const image = await productService.uploadImage(buffer, originalname);
-            const createdProduct = await productService.createProduct({ ...req.body, image });
+            console.log(req.body.json)
+            const createdProduct = await productService.createProduct({ ...req.body.json, image });
 
             res.status(201).json({ message: 'Product added correctly', product: createdProduct });
         } catch (error: any) {

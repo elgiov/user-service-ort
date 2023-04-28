@@ -44,17 +44,19 @@ class UserController {
         const password = req.body?.password;
         if (!email) {
             next(new HttpError(400, 'Email, parameter required.'));
+            return;
         }
         if (!password) {
             next(new HttpError(400, 'Password, parameter required.'));
+            return;
         }
 
         try {
             const user = await getUserByEmail(email);
             let comparedPassword = await bcrypt.compare(password, user?.password!);
             if (!user || !comparedPassword) {
-                console.log("entre")
                 next(new HttpError(401, 'Email or password incorrect.'));
+                return;
             }
             const privateKey = readFileSync(process.env.JWT_PRIVATE_KEY_PATH!);
             const role = user?.role;
