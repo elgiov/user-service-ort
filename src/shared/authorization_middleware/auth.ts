@@ -9,11 +9,7 @@ export interface DecodedToken {
     email: string, 
     name: string, 
     company: string
-  }
-
-  /*export interface CustomRequest extends Request {
-    user: any; 
-  }*/
+}
 
 const verifyToken = (req: CustomRequest<any>, res: Response, next: NextFunction) => {
     const authorization = req.header("Authorization");

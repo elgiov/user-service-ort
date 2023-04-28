@@ -4,18 +4,15 @@ import * as productService from '../services/productService';
 import { getCompanyById } from '../services/companyService';
 import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
-
-
 env.config();
 
 class ProductController {
     async addProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            console.log("llegue")
-            console.log(req.user)
-            const { name, company } = req.body.json;
-            console.log(name)
-            let name2 = req.body.json.name
+            let formatProduct = req.body.json
+            const bodyProduct = JSON.parse(formatProduct);
+            let company = req.user.company;
+            let name = bodyProduct.name;
             const product = await productService.getProduct(name, company);
 
             if (product) {
@@ -30,8 +27,7 @@ class ProductController {
 
             const { buffer, originalname } = file;
             const image = await productService.uploadImage(buffer, originalname);
-            console.log(req.body.json)
-            const createdProduct = await productService.createProduct({ ...req.body.json, image });
+            const createdProduct = await productService.createProduct({ ...bodyProduct,company, image });
 
             res.status(201).json({ message: 'Product added correctly', product: createdProduct });
         } catch (error: any) {
