@@ -25,7 +25,7 @@ export interface IUser extends Document {
 
 const isEmailValid = (email: string): boolean => validator.isEmail(email);
 
-const hashPassword = async (password: string): Promise<string> => {
+export const hashPassword = async (password: string): Promise<string> => {
     const salt = await bcrypt.genSalt();
     return bcrypt.hash(password, salt);
 };
