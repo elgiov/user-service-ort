@@ -3,12 +3,16 @@ import env from 'dotenv';
 import * as productService from '../services/productService';
 import { getCompanyById } from '../services/companyService';
 import HttpError from '../errors/httpError';
+import { CustomRequest } from '../types';
+
 
 env.config();
 
 class ProductController {
-    async addProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async addProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
+            console.log("llegue")
+            console.log(req.user)
             const { name, company } = req.body.json;
             console.log(name)
             let name2 = req.body.json.name
