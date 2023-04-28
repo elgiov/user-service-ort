@@ -1,8 +1,17 @@
 import fs from "fs"
 import jwt from "jsonwebtoken"
 import jwt_decode from "jwt-decode"
+import { Request, Response, NextFunction } from 'express';
+import { CustomRequest } from "../../types";
 
-const verifyToken = (req, res, next) => {
+export interface DecodedToken {
+    role: string;
+    email: string, 
+    name: string, 
+    company: string
+}
+
+const verifyToken = (req: CustomRequest<any>, res: Response, next: NextFunction) => {
     const authorization = req.header("Authorization");
     const token = authorization ? authorization.replace("Bearer ", "") : null;
 
@@ -22,11 +31,11 @@ const verifyToken = (req, res, next) => {
     return next();
 };
 
-const authRolePermissions = (permissions) => {
-    return (req, res, next) => {
+const authRolePermissions = (permissions: string | any[]) => {
+    return (req: CustomRequest<any>, res: Response, next: NextFunction) => {
         const authorization = req.header("Authorization");
         const token = authorization ? authorization.replace("Bearer ", "") : null;
-        var decoded = jwt_decode(token);
+        var decoded : DecodedToken = jwt_decode(token!);
         const userRole = decoded.role;
         if (permissions.length == 0 || permissions.includes(userRole)) {
             next();
@@ -34,10 +43,9 @@ const authRolePermissions = (permissions) => {
             return res.status(401).json({message: 'Invalid permission'});
         }
     }
-
 };
 
 export default {
     verifyToken,
     authRolePermissions
-  }
+}

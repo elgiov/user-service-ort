@@ -30,7 +30,6 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/companies', companyRoutes);
 
 
-
 // Connect to the MongoDB database
 connectDB();
 

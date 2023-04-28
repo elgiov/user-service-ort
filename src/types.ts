@@ -38,6 +38,6 @@ export interface CreateUserResponse {
 }
 
 export interface CustomRequest<T> extends Request {
-    user: IUser;
+    user: any; 
     body: T;
 }
