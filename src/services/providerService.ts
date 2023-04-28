@@ -1,8 +1,9 @@
+import { IProduct, Product } from '../models/product';
 import { Provider, IProvider } from '../models/provider';
 
-export const createProvider = async ({ name, address, email, phone }: IProvider): Promise<IProvider> => {
+export const createProvider = async ({ name, address, email, phone, company }: IProvider): Promise<IProvider> => {
     try {
-        const newProvider = new Provider({ name, address, email, phone });
+        const newProvider = new Provider({ name, address, email, phone, company });
         const provider = await newProvider.save();
         return provider;
     } catch (error) {
@@ -19,7 +20,7 @@ export const updateProvider = async (providerId: string, updateProvider: IProvid
         const updatedProvider = await Provider.findOneAndUpdate({ _id: providerId }, { ...provider.toObject(), ...updateProvider }, { new: true });
         return updatedProvider;
     } catch (error: any) {
-        throw new Error(`Could not update provider with name "${name}": ${error.message}`);
+        throw new Error(`Could not update provider with id "${providerId}": ${error.message}`);
     }
 };
 
@@ -36,11 +37,28 @@ export const deleteProvider = async (providerId: string): Promise<IProvider | nu
     }
 };
 
-const findProviderById = async (providerId: string): Promise<IProvider> => {
+export const getProviderProducts = async (provider: IProvider): Promise<IProduct[]> => {
+    try {
+        const products = await Product.find({ company: provider.company, deleted: false });
+        return products;
+    } catch (error: any) {
+        throw new Error(`Could not get products for provider "${provider.name}": ${error.message}`);
+    }
+};
+
+export const getProviders = async (): Promise<IProvider[]> => {
+    try {
+        const providers = await Provider.find({ deleted: false }).populate('company', 'name');
+        return providers;
+    } catch (error: any) {
+        throw new Error(`Could not get providers: ${error.message}`);
+    }
+};
+
+export const findProviderById = async (providerId: string): Promise<IProvider> => {
     const provider = await Provider.findById(providerId);
     if (!provider) {
         throw new Error(`Provider with id "${providerId}" not found`);
     }
     return provider;
 };
-

@@ -1,31 +1,22 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
+import { ICompany } from './company';
 import { IProduct } from './product';
 
-interface IPurchaseProduct {
-    product: IProduct['_id'];
-    quantity: number;
-}
-
 export interface IPurchase extends Document {
-    provider: string;
-    products: IPurchaseProduct[];
-    total: number;
+    provider: Types.ObjectId;
+    products: { product: Types.ObjectId; quantity: number }[];
+    company: ICompany['_id'];
 }
 
-const purchaseProductSchema = new Schema<IPurchaseProduct>({
-    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-    quantity: { type: Number, required: true }
+const purchaseSchema = new Schema<IPurchase>({
+    provider: { type: Schema.Types.ObjectId, required: true },
+    products: [
+        {
+            product: { type: Schema.Types.ObjectId, required: true },
+            quantity: { type: Number, required: true }
+        }
+    ],
+    company: { type: Schema.Types.ObjectId, ref: 'Company', required: true }
 });
-
-const purchaseSchema = new Schema<IPurchase>(
-    {
-        provider: { type: String, required: true },
-        products: { type: [purchaseProductSchema], required: true },
-        total: { type: Number, required: true }
-    },
-    {
-        timestamps: true
-    }
-);
 
 export const Purchase = model<IPurchase>('Purchase', purchaseSchema);

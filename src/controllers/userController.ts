@@ -11,7 +11,8 @@ env.config();
 class UserController {
     async registerAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const newUser = await createUser({ ...req.body, role: UserRole.ADMIN });
+            const { name, email, password, company } = req.body;
+            const newUser = await createUser({ name, email, password, company, role: UserRole.ADMIN });
             res.status(201).json(newUser);
         } catch (error: any) {
             next(new HttpError(500, error.message));
@@ -20,7 +21,8 @@ class UserController {
 
     async registerEmployee(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const newUser = await createUser({ ...req.body, role: UserRole.EMPLOYEE });
+            const { name, email, password, company } = req.body;
+            const newUser = await createUser({ name, email, password, company, role: UserRole.EMPLOYEE });
             res.status(201).json(newUser);
         } catch (error: any) {
             next(new HttpError(500, error.message));
@@ -45,7 +47,8 @@ class UserController {
             const privateKey = readFileSync(process.env.JWT_PRIVATE_KEY_PATH!);
             const role = user?.role;
             const name = user?.name;
-            const tokenPayload = { email, role, name };
+            const company = user?.company;
+            const tokenPayload = { email, role, name, company };
             const token = jwt.sign(tokenPayload, privateKey, { algorithm: 'RS256', expiresIn: '1h' });
             res.status(200).json({ userToken: token });
         } catch (error: any) {

@@ -8,7 +8,7 @@ class PurchaseController {
         try {
             const { provider, products } = req.body;
             const newPurchase = await createPurchase(provider, products);
-            await updateInventoryAfterPurchase(products);
+            await updateInventoryAfterPurchase(products, newPurchase.company);
             res.status(201).json(newPurchase);
         } catch (error: any) {
             next(new HttpError(500, error.message));

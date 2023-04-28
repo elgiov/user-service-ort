@@ -1,6 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
+import { ICompany } from './company';
 
 export enum UserRole {
     ADMIN = 'ADMIN',
@@ -11,7 +12,7 @@ export interface IUserInput extends Omit<Document, keyof Document> {
     name: string;
     email: string;
     password: string;
-    company: string;
+    company: ICompany['_id'];
     role: UserRole;
 }
 
@@ -19,7 +20,7 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
-    company: string;
+    company: ICompany['_id'];
     role: UserRole;
 }
 
@@ -40,7 +41,7 @@ const userSchema = new Schema<IUser>(
             validate: [isEmailValid, 'Invalid email']
         },
         password: { type: String, required: true },
-        company: { type: String, required: true },
+        company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
         role: { type: String, required: true, enum: Object.values(UserRole) }
     },
     { timestamps: true }

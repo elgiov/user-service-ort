@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import env from 'dotenv';
 import * as productService from '../services/productService';
+import { getCompanyById } from '../services/companyService';
 import HttpError from '../errors/httpError';
 
 env.config();
@@ -8,11 +9,12 @@ env.config();
 class ProductController {
     async addProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const nameProduct = req.body.name;
-            const product = await productService.getProductByName(nameProduct);
+            const { name, company } = req.body;
+            const product = await productService.getProduct(name, company);
 
             if (product) {
-                return next(new HttpError(422, `Product name: ${nameProduct} already exists`));
+                const companyObject = await getCompanyById(company);
+                return next(new HttpError(422, `The product ${product.name} already exists for the ${companyObject?.name} company.`));
             }
 
             const file = req.file;
@@ -22,9 +24,9 @@ class ProductController {
 
             const { buffer, originalname } = file;
             const image = await productService.uploadImage(buffer, originalname);
-            await productService.createProduct({ ...req.body, image });
+            const createdProduct = await productService.createProduct({ ...req.body, image });
 
-            res.status(201).json({ message: 'Product added correctly' });
+            res.status(201).json({ message: 'Product added correctly', product: createdProduct });
         } catch (error: any) {
             next(new HttpError(500, error.message));
         }
@@ -32,11 +34,11 @@ class ProductController {
 
     async updateProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const productName = req.params.name;
+            const { name, company } = req.body;
             const update = req.body;
-            const updatedProduct = await productService.updateProduct(productName, update);
+            const updatedProduct = await productService.updateProduct(name, company, update);
             if (!updatedProduct) {
-                return next(new HttpError(404, `Product with name "${productName}" not found`));
+                return next(new HttpError(404, `Product with name "${name}" for company "${company}" not found`));
             }
             res.status(200).json({ message: 'Product edited correctly', product: updatedProduct });
         } catch (error: any) {
@@ -46,11 +48,12 @@ class ProductController {
 
     async getProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const productName = req.params.name;
-            const product = await productService.getProductByName(productName);
+            const { name } = req.params;
+            const { company } = req.body;
+            const product = await productService.getProduct(name, company);
 
             if (!product) {
-                return next(new HttpError(404, `Product with name "${productName}" not found`));
+                return next(new HttpError(404, `Product with name "${name}" for company "${company}" not found`));
             }
 
             res.status(200).json(product);
@@ -59,12 +62,27 @@ class ProductController {
         }
     }
 
+    async getProductsByCompany(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { company } = req.body;
+            const products = await productService.getProductsByCompany(company);
+
+            if (!products || products.length === 0) {
+                return next(new HttpError(404, `No products found for company "${company}"`));
+            }
+
+            res.status(200).json(products);
+        } catch (error: any) {
+            next(new HttpError(500, error.message));
+        }
+    }
+
     async deleteProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const productName = req.params.name;
-            const deletedProduct = await productService.deleteProduct(productName);
+            const { name, company } = req.body;
+            const deletedProduct = await productService.deleteProduct(name, company);
             if (!deletedProduct) {
-                return next(new HttpError(404, `Product with name "${productName}" not found`));
+                return next(new HttpError(404, `Product with name "${name}" for company "${company}" not found`));
             }
             res.status(200).json({ message: 'Product deleted correctly' });
         } catch (error: any) {

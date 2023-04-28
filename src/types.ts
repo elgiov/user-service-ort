@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { Request } from 'express';
 
 export enum UserRole {
     ADMIN = 'ADMIN',
@@ -34,4 +35,9 @@ export interface CreateUserResponse {
     role: UserRole;
     _id?: string;
     message?: string; // extra property
+}
+
+export interface CustomRequest<T> extends Request {
+    user: IUser;
+    body: T;
 }

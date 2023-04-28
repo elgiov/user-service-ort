@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { IProduct } from '../models/product';
 import { Product } from '../models/product';
 import { ISale, Sale } from '../models/sale';
@@ -14,7 +15,7 @@ const calculateTotalAmount = (products: { quantity: number; unitPrice: number }[
     return products.reduce((total, { quantity, unitPrice }) => total + unitPrice * quantity, 0);
 };
 
-export const createSale = async (company: string, amount: number, products: { productId: string; quantity: number }[]): Promise<ISale> => {
+export const createSale = async (company: Types.ObjectId, products: { productId: string; quantity: number }[]): Promise<ISale> => {
     try {
         const productPromises = products.map(({ productId }) => findProductById(productId));
         const foundProducts = await Promise.all(productPromises);
@@ -22,16 +23,30 @@ export const createSale = async (company: string, amount: number, products: { pr
         const saleProducts = foundProducts.map((product, index) => {
             const { quantity } = products[index];
             const unitPrice = product.price;
-            return { productId: product._id, quantity, unitPrice };
+            return { product: product._id, quantity, unitPrice };
         });
 
-        const calculatedTotalAmount = calculateTotalAmount(saleProducts);
-
-        if (calculatedTotalAmount !== amount) {
-            throw new Error(`Provided total amount (${amount}) does not match calculated total amount (${calculatedTotalAmount})`);
+        // Check stock for each product
+        for (const product of saleProducts) {
+            const { product: productId, quantity } = product;
+            const dbProduct = await Product.findById(productId);
+            if (!dbProduct) {
+                throw new Error(`Product with id "${productId}" not found`);
+            }
+            if (dbProduct.quantity < quantity) {
+                throw new Error(`Insufficient stock for product with id "${productId}"`);
+            }
         }
 
-        const sale = new Sale({ company, amount, products: saleProducts });
+        const total = calculateTotalAmount(saleProducts) as number;
+
+        for (const product of saleProducts) {
+            const { product: productId, quantity } = product;
+            await Product.findByIdAndUpdate(productId, { $inc: { quantity: -quantity } });
+        }
+
+        const today = new Date();
+        const sale = new Sale({ company, total, products: saleProducts, date: today });
         await sale.save();
 
         return sale;
