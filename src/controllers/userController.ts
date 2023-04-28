@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { createUser, getUserByEmail } from '../services/userService';
-import { UserRole } from '../models/user';
+import { UserRole, hashPassword } from '../models/user';
 import { readFileSync } from 'fs';
 import jwt from 'jsonwebtoken';
 import env from 'dotenv';
 import HttpError from '../errors/httpError';
+import bcrypt from 'bcrypt';
 
 env.config();
 
@@ -41,7 +42,9 @@ class UserController {
 
         try {
             const user = await getUserByEmail(email);
-            if (!user || user.password !== password) {
+            let comparedPassword = await bcrypt.compare(password, user?.password!);
+            if (!user || !comparedPassword) {
+                console.log("entre")
                 next(new HttpError(401, 'Email or password incorrect.'));
             }
             const privateKey = readFileSync(process.env.JWT_PRIVATE_KEY_PATH!);
