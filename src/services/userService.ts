@@ -2,14 +2,16 @@ import { User, IUser, IUserInput } from '../models/user';
 
 export const createUser = async ({ name, email, password, company, role }: IUserInput): Promise<IUser> => {
     try {
-        console.log('Creating user');
+        const existingUser = await getUserByEmail(email);
+        if (existingUser) {
+            throw new Error('User with this email already exists');
+        }
+
         const newUser = new User({ name, email, password, company, role });
-        console.log('User created in service');
         const user = await newUser.save();
-        console.log('User saved in service');
         return user;
-    } catch (error) {
-        throw new Error('Could not create user');
+    } catch (error: any) {
+        throw new Error(`Could not create user: ${error.message}`);
     }
 };
 
@@ -18,9 +20,7 @@ export const getUserById = async (id: string): Promise<IUser | null> => {
     return user;
 };
 
-export const getUserByEmail = async (email:string) => {
-    const user = await User.findOne({email});
+export const getUserByEmail = async (email: string) => {
+    const user = await User.findOne({ email });
     return user;
-}
-
-
+};
