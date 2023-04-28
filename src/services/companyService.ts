@@ -20,6 +20,15 @@ export const getCompanyById = async (id: string): Promise<ICompany | null> => {
     }
 };
 
+export const getCompanyByName = async (name: string): Promise<ICompany | null> => {
+    try {
+        const company = await Company.findOne({ name });
+        return company;
+    } catch (error: any) {
+        throw new Error(`Error fetching company by name: ${error.message}`);
+    }
+};
+
 export const getCompanies = async (): Promise<ICompany[]> => {
     try {
         const companies = await Company.find();

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { createUser, getUserByEmail } from '../services/userService';
 import { UserRole, hashPassword } from '../models/user';
+import { createCompany, getCompanyByName } from '../services/companyService';
 import { readFileSync } from 'fs';
 import jwt from 'jsonwebtoken';
 import env from 'dotenv';
@@ -12,9 +13,17 @@ env.config();
 class UserController {
     async registerAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { name, email, password, company } = req.body;
-            const newUser = await createUser({ name, email, password, company, role: UserRole.ADMIN });
-            res.status(201).json(newUser);
+            const { name, email, password, company, address } = req.body;
+            const existingCompany = await getCompanyByName(company);
+    
+            if (existingCompany) {
+                next(new HttpError(409, 'Company with this name already exists'));
+                return;
+            }
+    
+            const newCompany = await createCompany(company, address);
+            const newUser = await createUser({ name, email, password, company: newCompany._id, role: UserRole.ADMIN });
+            res.status(201).json({ user: newUser, company: newCompany });
         } catch (error: any) {
             next(new HttpError(500, error.message));
         }
