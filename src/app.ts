@@ -16,7 +16,7 @@ app.use(errorHandler);
 app.use(function (req, res, next) {
     //Enabling CORS
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE");
     res.header("Access-Control-Allow-Headers", "Referrer-Policy, Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization, cache-control");
     //res.header("Cache-Control", "no-cache, no-store");
     //res.header("Pragma", "no-cache");
