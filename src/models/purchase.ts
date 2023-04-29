@@ -6,6 +6,8 @@ export interface IPurchase extends Document {
     provider: Types.ObjectId;
     products: { product: Types.ObjectId; quantity: number }[];
     company: ICompany['_id'];
+    date: Date;
+    total: number;
 }
 
 const purchaseSchema = new Schema<IPurchase>({
@@ -16,7 +18,9 @@ const purchaseSchema = new Schema<IPurchase>({
             quantity: { type: Number, required: true }
         }
     ],
-    company: { type: Schema.Types.ObjectId, ref: 'Company', required: true }
+    company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
+    date: { type: Date, required: true },
+    total: { type: Number, required: true }
 });
 
 export const Purchase = model<IPurchase>('Purchase', purchaseSchema);

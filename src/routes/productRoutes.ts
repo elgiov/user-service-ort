@@ -8,6 +8,8 @@ const router = Router();
 //@ts-ignore
 router.post('/add', auth.verifyToken, auth.authRolePermissions(['ADMIN']), multerUpload.single('image'), productController.addProduct);
 router.put('/:name', productController.updateProduct);
+//@ts-ignore
+router.get('/top', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.getTopProducts);
 router.get('/:name', productController.getProduct);
 router.get('/', productController.getProductsByCompany);
 router.delete('/:name', productController.deleteProduct);

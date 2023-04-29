@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import providerController from '../controllers/providerController';
+import auth from '../shared/authorization_middleware/auth';
 
 const router = Router();
 
-router.post('/add', providerController.addProvider);
+//@ts-ignore
+router.post('/add', auth.verifyToken, auth.authRolePermissions(['ADMIN']), providerController.addProvider);
 router.put('/:providerId', providerController.updateProvider);
 router.delete('/:name', providerController.deleteProvider);
 router.get('/', providerController.getProviders);

@@ -2,12 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import env from 'dotenv';
 import * as providerService from '../services/providerService';
 import HttpError from '../errors/httpError';
+import { CustomRequest } from '../types';
 env.config();
 
 class ProviderController {
-    async addProvider(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async addProvider(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            await providerService.createProvider({ ...req.body });
+            const company = req.user.company;
+            if (!company) {
+                return next(new HttpError(400, 'No company provided'));
+            }
+
+            await providerService.createProvider({ ...req.body }, company);
             res.status(201).json({ message: 'Provider added correctly' });
         } catch (error: any) {
             next(new HttpError(500, error.message));

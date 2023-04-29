@@ -15,12 +15,12 @@ class UserController {
         try {
             const { name, email, password, company, address } = req.body;
             const existingCompany = await getCompanyByName(company);
-    
+
             if (existingCompany) {
                 next(new HttpError(409, 'Company with this name already exists'));
                 return;
             }
-    
+
             const newCompany = await createCompany(company, address);
             const newUser = await createUser({ name, email, password, company: newCompany._id, role: UserRole.ADMIN });
             res.status(201).json({ user: newUser, company: newCompany });
@@ -39,7 +39,7 @@ class UserController {
         }
     }
 
-    login = async (req: Request, res: Response, next: NextFunction) => {
+    async login(req: Request, res: Response, next: NextFunction) {
         const email = req.body?.email;
         const password = req.body?.password;
         if (!email) {
@@ -68,7 +68,7 @@ class UserController {
         } catch (error: any) {
             next(new HttpError(500, error.message));
         }
-    };
+    }
 }
 
 export default new UserController();

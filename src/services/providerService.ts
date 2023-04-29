@@ -1,7 +1,7 @@
 import { IProduct, Product } from '../models/product';
 import { Provider, IProvider } from '../models/provider';
 
-export const createProvider = async ({ name, address, email, phone, company }: IProvider): Promise<IProvider> => {
+export const createProvider = async ({ name, address, email, phone }: IProvider, company: string): Promise<IProvider> => {
     try {
         const newProvider = new Provider({ name, address, email, phone, company });
         const provider = await newProvider.save();

@@ -33,8 +33,8 @@ export const createPurchase = async (provider: string, products: { productId: st
                 unitPrice: foundProducts[index].price
             }))
         );
-
-        const purchase = new Purchase({ provider, products: purchaseProducts, total, company });
+        const today = new Date();
+        const purchase = new Purchase({ provider, products: purchaseProducts, total, company, date: today });
         await purchase.save();
 
         return purchase;
