@@ -1,4 +1,3 @@
-// controllers/saleController.ts
 import { Request, Response, NextFunction } from 'express';
 import { createSale } from '../services/saleService';
 import HttpError from '../errors/httpError';

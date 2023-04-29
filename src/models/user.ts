@@ -14,6 +14,7 @@ export interface IUserInput extends Omit<Document, keyof Document> {
     password: string;
     company: ICompany['_id'];
     role: UserRole;
+    token?: string;
 }
 
 export interface IUser extends Document {
@@ -22,6 +23,7 @@ export interface IUser extends Document {
     password: string;
     company: ICompany['_id'];
     role: UserRole;
+    token?: string;
 }
 
 const isEmailValid = (email: string): boolean => validator.isEmail(email);
@@ -42,7 +44,8 @@ const userSchema = new Schema<IUser>(
         },
         password: { type: String, required: true },
         company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
-        role: { type: String, required: true, enum: Object.values(UserRole) }
+        role: { type: String, required: true, enum: Object.values(UserRole) },
+        token: { type: String }
     },
     { timestamps: true }
 );
