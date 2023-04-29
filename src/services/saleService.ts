@@ -15,7 +15,7 @@ const calculateTotalAmount = (products: { quantity: number; unitPrice: number }[
     return products.reduce((total, { quantity, unitPrice }) => total + unitPrice * quantity, 0);
 };
 
-export const createSale = async (company: Types.ObjectId, products: { productId: string; quantity: number }[]): Promise<ISale> => {
+export const createSale = async (company: Types.ObjectId, products: { productId: string; quantity: number }[], client:string): Promise<ISale> => {
     try {
         const productPromises = products.map(({ productId }) => findProductById(productId));
         const foundProducts = await Promise.all(productPromises);
@@ -46,7 +46,7 @@ export const createSale = async (company: Types.ObjectId, products: { productId:
         }
 
         const today = new Date();
-        const sale = new Sale({ company, total, products: saleProducts, date: today });
+        const sale = new Sale({ company, total, products: saleProducts, date: today, client });
         await sale.save();
 
         return sale;

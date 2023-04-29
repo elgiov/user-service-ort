@@ -11,6 +11,7 @@ export interface ISale extends Document {
     }[];
     total: number;
     date: Date;
+    client: string;
 }
 
 const SaleSchema = new Schema<ISale>(
@@ -24,7 +25,8 @@ const SaleSchema = new Schema<ISale>(
             }
         ],
         total: { type: Number, required: true },
-        date: { type: Date, required: true }
+        date: { type: Date, required: true },
+        client: {type: String, required: true}
     },
     {
         timestamps: true
