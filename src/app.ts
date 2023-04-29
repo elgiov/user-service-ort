@@ -8,10 +8,11 @@ import { errorHandler } from './middlewares/errorHandler';
 import providerRoutes from './routes/providerRoutes';
 import companyRoutes from './routes/companyRoutes';
 import inviteRoutes from './routes/inviteRoutes';
-
+import cors from 'cors';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use(errorHandler);
 app.use(function (req, res, next) {

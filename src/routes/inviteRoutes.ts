@@ -1,11 +1,11 @@
 //@ts-nocheck
 import { Router } from 'express';
-import productController from '../controllers/productController';
+import inviteController from '../controllers/inviteController';
 import auth from '../shared/authorization_middleware/auth';
 
 const router = Router();
 
-router.post('/', invitationController.sendInvitation);
-router.get('/:token', InvitationController.getInvitationData);
+router.post('/', auth.verifyToken, inviteController.sendInvitation);
+router.get('/:token', auth.verifyToken, inviteController.getInvitationData);
 
 export default router;

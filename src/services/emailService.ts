@@ -1,17 +1,9 @@
-import nodemailer from 'nodemailer';
-import { SentMessageInfo } from 'nodemailer/lib/sendmail-transport';
+import sgMail from '@sendgrid/mail';
 import { Company } from '../models/company';
 
-const EMAIL_USER = 'gstorepcs@gmail.com';
-const EMAIL_PASS = 'gstorepcs2023';
+const SENDGRID_API_KEY = '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';
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS
-    }
-});
+sgMail.setApiKey(SENDGRID_API_KEY);
 
 interface SendInvitationEmailOptions {
     to: string;
@@ -19,13 +11,23 @@ interface SendInvitationEmailOptions {
     invitationLink: string;
 }
 
-export async function sendInvitationEmail({ to, company, invitationLink }: SendInvitationEmailOptions): Promise<SentMessageInfo> {
-    const companyName = await Company.findById(company).select('name');
-    const mailOptions = {
-        from: EMAIL_USER,
+export async function sendInvitationEmail({ to, company, invitationLink }: SendInvitationEmailOptions): Promise<void> {
+    const companyFromDB = await Company.findById(company).select('name');
+    if (!companyFromDB) {
+        throw new Error('Company not found');
+    }
+    const msg = {
         to,
-        subject: 'Invitación para unirse a ' + companyName,
-        text: `Ha sido invitado a unirse a la empresa "${companyName}" en nuestra plataforma. Por favor, haga click en el enlace de abajo para registrarse y unirse a la empresa:\n\n${invitationLink}\n\nSi no solicitó esta invitación, ignore este correo electrónico.`
+        from: 'gioghisellini@gmail.com',
+        subject: 'Invitación para unirse a ' + companyFromDB.name,
+        text: `Ha sido invitado a unirse a la empresa "${companyFromDB.name}" en nuestra plataforma. Por favor, haga click en el enlace de abajo para registrarse y unirse a la empresa:\n\n${invitationLink}\n\nSi no solicitó esta invitación, ignore este correo electrónico.`
     };
-    return transporter.sendMail(mailOptions);
+    await sgMail
+        .send(msg)
+        .then(() => {
+            console.log('Email sent');
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }

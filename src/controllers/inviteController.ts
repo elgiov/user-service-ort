@@ -35,11 +35,11 @@ class InvitationController {
     async getInvitationData(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const token = req.params.token;
-            const invite = await Invite.findOne({ token }).populate('company');
+            const invite = await Invite.findOne({ token }).populate('company email role');
             if (!invite) {
                 return next(new HttpError(404, 'Invitation not found'));
             }
-            res.json({ companyName: invite.company.name });
+            res.json({ companyName: invite.company.name, email: invite.email, role: invite.role });
         } catch (error: any) {
             next(new HttpError(500, error.message));
         }
