@@ -35,9 +35,10 @@ class ProductController {
         }
     }
 
-    async updateProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async updateProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { name, company } = req.body;
+            const name  = req.params.name;
+            const company = req.user.company;
             const update = req.body;
             const updatedProduct = await productService.updateProduct(name, company, update);
             if (!updatedProduct) {
@@ -65,9 +66,9 @@ class ProductController {
         }
     }
 
-    async getProductsByCompany(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async getProductsByCompany(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { company } = req.body;
+            const company = req.user.company;
             const products = await productService.getProductsByCompany(company);
 
             if (!products || products.length === 0) {
@@ -80,9 +81,10 @@ class ProductController {
         }
     }
 
-    async deleteProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async deleteProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { name, company } = req.body;
+            const name  = req.params.name;
+            const company = req.user.company;
             const deletedProduct = await productService.deleteProduct(name, company);
             if (!deletedProduct) {
                 return next(new HttpError(404, `Product with name "${name}" for company "${company}" not found`));
