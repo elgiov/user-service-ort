@@ -22,7 +22,7 @@ class ProviderController {
 
     async updateProvider(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const providerId = req.params.providerId;
+            const providerId = req.params.providerId;         
             const updateProvider = req.body;
             const updatedProvider = await providerService.updateProvider(providerId, updateProvider);
             if (!updatedProvider) {
