@@ -37,9 +37,9 @@ export const deleteProvider = async (providerId: string): Promise<IProvider | nu
     }
 };
 
-export const getProviderProducts = async (provider: IProvider): Promise<IProduct[]> => {
+export const getProviderProducts = async (provider: IProvider, company: string): Promise<IProduct[]> => {
     try {
-        const products = await Product.find({ company: provider.company, deleted: false });
+        const products = await Product.find({ company: company, provider: provider._id, deleted: false });
         return products;
     } catch (error: any) {
         throw new Error(`Could not get products for provider "${provider.name}": ${error.message}`);

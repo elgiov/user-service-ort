@@ -56,15 +56,16 @@ class ProviderController {
         }
     }
 
-    async getProductsByProvider(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async getProductsByProvider(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const providerId = req.params.providerId;
+            const company = req.user.company;
             const provider = await providerService.findProviderById(providerId);
             if (!provider) {
                 logger.error(`Error in getProductsByProvider: Provider with id "${providerId}" not found`);
                 return next(new HttpError(404, `Provider with id "${providerId}" not found`));
             }
-            const products = await providerService.getProviderProducts(provider);
+            const products = await providerService.getProviderProducts(provider, company);
             res.status(200).json(products);
             logger.info(`Products from provider with id "${providerId}" found`);
         } catch (error: any) {
