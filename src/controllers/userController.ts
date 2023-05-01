@@ -13,7 +13,7 @@ env.config();
 class UserController {
     async registerAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { name, email, password, company, address } = req.body;
+            const { name, email, password, company, address, token } = req.body;
             const existingCompany = await getCompanyByName(company);
 
             if (existingCompany) {
@@ -22,7 +22,7 @@ class UserController {
             }
 
             const newCompany = await createCompany(company, address);
-            const newUser = await createUser({ name, email, password, company: newCompany._id, role: UserRole.ADMIN });
+            const newUser = await createUser({ name, email, password, company: newCompany._id, role: UserRole.ADMIN, token });
             res.status(201).json({ user: newUser, company: newCompany });
         } catch (error: any) {
             next(new HttpError(500, error.message));
@@ -31,8 +31,8 @@ class UserController {
 
     async registerEmployee(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { name, email, password, company } = req.body;
-            const newUser = await createUser({ name, email, password, company, role: UserRole.EMPLOYEE });
+            const { name, email, password, company, token } = req.body;
+            const newUser = await createUser({ name, email, password, company, role: UserRole.EMPLOYEE, token });
             res.status(201).json(newUser);
         } catch (error: any) {
             next(new HttpError(500, error.message));

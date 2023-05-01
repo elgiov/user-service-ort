@@ -1,14 +1,32 @@
 import { User, IUser, IUserInput } from '../models/user';
 
-export const createUser = async ({ name, email, password, company, role }: IUserInput): Promise<IUser> => {
+// userService.ts
+import { IInvite, Invite } from '../models/invite';
+
+export const createUser = async ({ name, email, password, company, role, token }: IUserInput & { token?: string }): Promise<IUser> => {
     try {
         const existingUser = await getUserByEmail(email);
         if (existingUser) {
             throw new Error('User with this email already exists');
         }
 
+        let invite: IInvite | null = null;
+        if (token) {
+            invite = await Invite.findOne({ token });
+            if (!invite) {
+                throw new Error('Invalid invitation token');
+            }
+            role = invite.role;
+            company = invite.company;
+        }
+
         const newUser = new User({ name, email, password, company, role });
         const user = await newUser.save();
+
+        if (invite) {
+            await Invite.deleteOne({ _id: invite._id });
+        }
+
         return user;
     } catch (error: any) {
         throw new Error(`Could not create user: ${error.message}`);
