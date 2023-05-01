@@ -9,6 +9,8 @@ import providerRoutes from './routes/providerRoutes';
 import companyRoutes from './routes/companyRoutes';
 import inviteRoutes from './routes/inviteRoutes';
 import cors from 'cors';
+import logger from './config/logger';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -39,7 +41,7 @@ app.use(errorHandler);
 connectDB();
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
 });
 
 export { app };

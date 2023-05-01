@@ -5,6 +5,7 @@ import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
 import { Types } from 'mongoose';
 import { Purchase } from '../models/purchase';
+import logger from '../config/logger';
 
 class PurchaseController {
     async createPurchase(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -13,7 +14,9 @@ class PurchaseController {
             const newPurchase = await createPurchase(provider, products);
             await updateInventoryAfterPurchase(products, newPurchase.company);
             res.status(201).json(newPurchase);
+            logger.info(`New purchase created`);
         } catch (error: any) {
+            logger.error(`Error in createPurchase: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }
@@ -22,7 +25,8 @@ class PurchaseController {
         try {
             let company = req.user.company;
             if (!company) {
-                throw new HttpError(401, 'Invalid API key');
+                logger.error('No company provided');
+                throw new HttpError(401, 'No company provided');
             }
 
             const companyObjectId = new Types.ObjectId(company);
@@ -41,7 +45,9 @@ class PurchaseController {
                 .exec();
 
             res.json(purchases);
+            logger.info(`Purchases for provider ${providerId} retrieved`);
         } catch (error: any) {
+            logger.error(`Error in getPurchasesForProvider: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }

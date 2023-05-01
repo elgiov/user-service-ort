@@ -4,7 +4,8 @@ import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
 import { Sale } from '../models/sale';
 import { Types } from 'mongoose';
-
+import logger from '../config/logger';
+import moment from 'moment';
 class SaleController {
     async createSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
@@ -12,7 +13,9 @@ class SaleController {
             const { products, client } = req.body;
             const newSale = await createSale(company, products, client);
             res.status(201).json(newSale);
+            logger.info(`New sale created`);
         } catch (error: any) {
+            logger.error(`Error in createSale: ${error.message}`);
             next(new HttpError(400, error.message));
         }
     }
@@ -21,30 +24,23 @@ class SaleController {
         try {
             const company = req.user.company;
             if (!company) {
-                return next(new HttpError(401, 'Invalid API key'));
+                logger.error('No company provided');
+                return next(new HttpError(401, 'No company provided'));
             }
 
             const page = parseInt(req.query.page as string) || 1;
             const limit = 5;
 
             const startDate = req.query.startDate
-                ? new Date(
-                      Date.UTC(
-                          new Date(req.query.startDate as string).getFullYear(),
-                          new Date(req.query.startDate as string).getMonth(),
-                          new Date(req.query.startDate as string).getDate()
-                      )
-                  )
-                : new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), 1));
+                ? moment(req.query.startDate as string, 'YYYY-MM-DD')
+                      .toISOString()
+                      .substring(0, 10)
+                : moment.utc().startOf('month').toISOString().substring(0, 10);
             const endDate = req.query.endDate
-                ? new Date(
-                      Date.UTC(
-                          new Date(req.query.endDate as string).getFullYear(),
-                          new Date(req.query.endDate as string).getMonth(),
-                          new Date(req.query.endDate as string).getDate()
-                      )
-                  )
-                : new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
+                ? moment(req.query.endDate as string, 'YYYY-MM-DD')
+                      .toISOString()
+                      .substring(0, 10)
+                : moment.utc().toISOString().substring(0, 10);
 
             const companyObjectId = new Types.ObjectId(company);
 
@@ -79,7 +75,9 @@ class SaleController {
                     pageSize: limit
                 }
             });
+            logger.info(`All sales found`);
         } catch (error: any) {
+            logger.error(`Error in getSales: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }
@@ -140,7 +138,9 @@ class SaleController {
             ]);
 
             res.json(salesByProduct);
+            logger.info(`Sales by product found`);
         } catch (error: any) {
+            logger.error(`Error in getSalesByProduct: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }
