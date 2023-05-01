@@ -46,9 +46,9 @@ export const getProviderProducts = async (provider: IProvider, company: string):
     }
 };
 
-export const getProviders = async (): Promise<IProvider[]> => {
+export const getProviders = async (company: string): Promise<IProvider[]> => {
     try {
-        const providers = await Provider.find({ deleted: false }).populate('company', 'name');
+        const providers = await Provider.find({ company: company, deleted: false }).populate('company', 'name');
         return providers;
     } catch (error: any) {
         throw new Error(`Could not get providers: ${error.message}`);

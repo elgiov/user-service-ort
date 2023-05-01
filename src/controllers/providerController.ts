@@ -74,13 +74,14 @@ class ProviderController {
         }
     }
 
-    async getProviders(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async getProviders(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const providers = await providerService.getProviders();
+            const company = req.user.company;
+            const providers = await providerService.getProviders(company);
             res.status(200).json(providers);
-            logger.info(`All providers found`);
+            logger.info(`Providers for the company with id "${company}" found`);
         } catch (error: any) {
-            logger.error(`Error in getProviders: ${error.message}`);
+            logger.error(`Error in getCompanyProviders: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }
