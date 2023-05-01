@@ -9,6 +9,6 @@ const router = Router();
 router.post('/register/admin', userController.registerAdmin);
 router.post('/register/employee', userController.registerEmployee);
 router.post('/login', userController.login);
-
+router.post('/register', userController.registerUser);
 
 export default router;

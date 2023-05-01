@@ -9,8 +9,8 @@ class SaleController {
     async createSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const company = req.user.company;
-            const {products, client} = req.body;
-            const newSale = await createSale(company, products,client);
+            const { products, client } = req.body;
+            const newSale = await createSale(company, products, client);
             res.status(201).json(newSale);
         } catch (error: any) {
             next(new HttpError(400, error.message));
@@ -25,12 +25,23 @@ class SaleController {
             }
 
             const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 10;
+            const limit = 5;
 
             const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
             const endDate = req.query.endDate ? new Date(req.query.endDate as string) : new Date();
 
             const companyObjectId = new Types.ObjectId(company);
+
+            const totalSales = await Sale.countDocuments({
+                company: companyObjectId,
+                date: {
+                    $gte: startDate,
+                    $lte: endDate
+                }
+            });
+
+            const totalPages = Math.ceil(totalSales / limit);
+
             const sales = await Sale.find({
                 company: companyObjectId,
                 date: {
@@ -38,11 +49,20 @@ class SaleController {
                     $lte: endDate
                 }
             })
+                .populate('products.product')
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .sort({ date: -1 });
 
-            res.json(sales);
+            res.json({
+                sales,
+                pageInfo: {
+                    totalSales,
+                    totalPages,
+                    currentPage: page,
+                    pageSize: limit
+                }
+            });
         } catch (error: any) {
             next(new HttpError(500, error.message));
         }
