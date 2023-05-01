@@ -27,8 +27,24 @@ class SaleController {
             const page = parseInt(req.query.page as string) || 1;
             const limit = 5;
 
-            const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-            const endDate = req.query.endDate ? new Date(req.query.endDate as string) : new Date();
+            const startDate = req.query.startDate
+                ? new Date(
+                      Date.UTC(
+                          new Date(req.query.startDate as string).getFullYear(),
+                          new Date(req.query.startDate as string).getMonth(),
+                          new Date(req.query.startDate as string).getDate()
+                      )
+                  )
+                : new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), 1));
+            const endDate = req.query.endDate
+                ? new Date(
+                      Date.UTC(
+                          new Date(req.query.endDate as string).getFullYear(),
+                          new Date(req.query.endDate as string).getMonth(),
+                          new Date(req.query.endDate as string).getDate()
+                      )
+                  )
+                : new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
 
             const companyObjectId = new Types.ObjectId(company);
 
