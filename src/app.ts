@@ -51,9 +51,6 @@ app.use('/api', healthRoutes);
 
 app.use(errorHandler);
 
-app.get('/requests-per-minute', (req, res) => {
-    res.json({ requestsPerMinute: requestsPerMinute.get().values[0].value });
-});
 connectDB();
 
 app.listen(PORT, () => {
