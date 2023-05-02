@@ -8,6 +8,7 @@ import env from 'dotenv';
 import HttpError from '../errors/httpError';
 import bcrypt from 'bcrypt';
 import logger from '../config/logger';
+import { CustomRequest } from '../types';
 
 env.config();
 
@@ -65,6 +66,17 @@ class UserController {
             logger.info(`New employee created: ${newUser.name}`);
         } catch (error: any) {
             logger.error(`Error in registerEmployee: ${error.message}`);
+            next(new HttpError(500, error.message));
+        }
+    }
+
+    async infoUser(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userInfo = req.user;
+            res.status(201).json(userInfo);
+            logger.info(`GET info user ${userInfo.name}`);
+        } catch (error: any) {
+            logger.error(`Error in infoUser: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }
