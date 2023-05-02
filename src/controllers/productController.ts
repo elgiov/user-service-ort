@@ -9,6 +9,7 @@ import { Sale } from '../models/sale';
 import { Product } from '../models/product';
 import { Types } from 'mongoose';
 import logger from '../config/logger';
+import { getAsync, setexAsync } from '../cache';
 env.config();
 
 class ProductController {
@@ -115,42 +116,90 @@ class ProductController {
             next(new HttpError(500, error.message));
         }
     }
-
-    async getTopProducts(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+    
+    getTopProducts = async (req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> => {
         try {
-            let company = req.user.company;
+            const company = req.user.company;
             if (!company) {
                 logger.error(`Error in getTopProducts: No company provided`);
                 throw new HttpError(401, 'No company provided');
             }
 
-            const companyObjectId = new Types.ObjectId(company);
+            const cacheKey = `topProducts:${company}`;
+            const cachedData = await getAsync(cacheKey);
 
-            const results = await Sale.aggregate([
-                { $match: { company: companyObjectId } },
-                { $unwind: '$products' },
-                { $group: { _id: '$products.product', totalSold: { $sum: '$products.quantity' } } },
-                { $sort: { totalSold: -1 } },
-                { $limit: 3 }
-            ]);
+            if (cachedData) {
+                const topProducts = JSON.parse(cachedData);
+                res.json(topProducts);
+                logger.info(`Top products found for company "${company}" (from cache)`);
+            } else {
+                await this.prePopulateCache(company);
 
-            const productIds = results.map((result) => result._id);
-            const products = await Product.find({ _id: { $in: productIds } }, { name: 1 });
+                const companyObjectId = new Types.ObjectId(company);
 
-            const topProducts = results.map((result) => {
-                const product = products.find((p) => p._id.equals(result._id));
-                if (!product) {
-                    logger.error(`Error in getTopProducts: Product not found`);
-                    throw new HttpError(500, 'Product not found');
-                }
-                return { name: product.name, totalSold: result.totalSold };
-            });
-            res.json(topProducts);
-            logger.info(`Top products found for company "${company}"`);
+                const results = await Sale.aggregate([
+                    { $match: { company: companyObjectId } },
+                    { $unwind: '$products' },
+                    { $group: { _id: '$products.product', totalSold: { $sum: '$products.quantity' } } },
+                    { $sort: { totalSold: -1 } },
+                    { $limit: 3 },
+                    {
+                        $lookup: {
+                            from: 'products',
+                            localField: '_id',
+                            foreignField: '_id',
+                            as: 'productData'
+                        }
+                    },
+                    { $unwind: '$productData' },
+                    {
+                        $project: {
+                            _id: 0,
+                            name: '$productData.name',
+                            totalSold: 1
+                        }
+                    }
+                ]);
+
+                res.json(results);
+                logger.info(`Top products found for company "${company}" (from database)`);
+            }
         } catch (error: any) {
             logger.error(`Error in getTopProducts: ${error.message}`);
             next(new HttpError(500, error.message));
         }
+    };
+
+    async prePopulateCache(companyId: string): Promise<void> {
+        const cacheKey = `topProducts:${companyId}`;
+
+        const companyObjectId = new Types.ObjectId(companyId);
+
+        const results = await Sale.aggregate([
+            { $match: { company: companyObjectId } },
+            { $unwind: '$products' },
+            { $group: { _id: '$products.product', totalSold: { $sum: '$products.quantity' } } },
+            { $sort: { totalSold: -1 } },
+            { $limit: 3 },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'productData'
+                }
+            },
+            { $unwind: '$productData' },
+            {
+                $project: {
+                    _id: 0,
+                    name: '$productData.name',
+                    totalSold: 1
+                }
+            }
+        ]);
+
+        await setexAsync(cacheKey, 60, JSON.stringify(results));
     }
 }
 
