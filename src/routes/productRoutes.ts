@@ -8,7 +8,7 @@ const router = Router();
 
 router.post('/add',auth.verifyToken, auth.authRolePermissions(['ADMIN']), multerUpload.single('image'), productController.addProduct);
 router.put('/:name',auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.updateProduct);
-router.get('/top', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.getTopProducts);
+router.get('/top', auth.verifyToken, productController.getTopProducts);
 router.get('/:name',auth.verifyToken,productController.getProduct);
 router.get('/', auth.verifyToken,productController.getProductsByCompany);
 router.delete('/:name', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.deleteProduct);
