@@ -9,7 +9,7 @@ import providerRoutes from './routes/providerRoutes';
 import companyRoutes from './routes/companyRoutes';
 import inviteRoutes from './routes/inviteRoutes';
 import cors from 'cors';
-import logger from './config/logger';
+import { logger } from './config/logger';
 import healthRoutes from './routes/healthRoutes';
 import { responseTimes, register, requestsPerMinute } from './metrics';
 
@@ -24,7 +24,11 @@ app.use((req, res, next) => {
         const elapsedTime = Date.now() - startTime;
         responseTimes.observe(elapsedTime);
         requestsPerMinute.inc();
-        logger.info(`Endpoint: ${req.method} ${req.originalUrl} - Response time: ${elapsedTime} ms - Status code: ${res.statusCode} - Requests per minute: ${(await requestsPerMinute.get()).values[0].value}`);
+        logger.info(
+            `Endpoint: ${req.method} ${req.originalUrl} - Response time: ${elapsedTime} ms - Status code: ${res.statusCode} - Requests per minute: ${
+                (await requestsPerMinute.get()).values[0].value
+            }`
+        );
     });
     next();
 });

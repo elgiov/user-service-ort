@@ -3,7 +3,7 @@ import env from 'dotenv';
 import * as providerService from '../services/providerService';
 import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 env.config();
 class ProviderController {
     async addProvider(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {

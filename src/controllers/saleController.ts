@@ -4,7 +4,7 @@ import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
 import { Sale } from '../models/sale';
 import { Types } from 'mongoose';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import moment from 'moment';
 import { getAsync, setexAsync } from '../cache';
 
@@ -98,12 +98,12 @@ class SaleController {
             if (cachedData) {
                 const salesByProduct = JSON.parse(cachedData);
                 res.json(salesByProduct);
-                logger.info(`Sales by product found (from cache)`);
+                logger.info(`Sales by product found. (Retrieved from cache)`);
             } else {
                 const salesByProduct = await this.fetchSalesByProduct(company, startDate, endDate);
                 await setexAsync(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(salesByProduct));
                 res.json(salesByProduct);
-                logger.info(`Sales by product found (from database)`);
+                logger.info(`Sales by product found. (Retrieved from database)`);
             }
         } catch (error: any) {
             logger.error(`Error in getSalesByProduct: ${error.message}`);

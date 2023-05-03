@@ -5,7 +5,9 @@ import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
 import { Types } from 'mongoose';
 import { Purchase } from '../models/purchase';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
+import { getAsync, setexAsync } from '../cache';
+const CACHE_TTL_SECONDS = 60;
 
 class PurchaseController {
     async createPurchase(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -35,17 +37,28 @@ class PurchaseController {
             const startDate = new Date(req.query.startDate as string);
             const endDate = new Date(req.query.endDate as string);
 
-            const purchases = await Purchase.find({
-                company: companyObjectId,
-                provider: providerObjectId,
-                date: { $gte: startDate, $lte: endDate }
-            })
-                .populate({ path: 'provider', model: 'Provider', select: 'name' })
-                .populate({ path: 'products.product', model: 'Product', select: 'name' })
-                .exec();
+            const cacheKey = `purchases:${company}:${providerId}:${startDate.toISOString()}:${endDate.toISOString()}`;
+            const cachedData = await getAsync(cacheKey);
 
-            res.json(purchases);
-            logger.info(`Purchases for provider ${providerId} retrieved`);
+            if (cachedData) {
+                const purchases = JSON.parse(cachedData);
+                res.json(purchases);
+                logger.info(`Purchases for provider ${providerId}. (Retrieved from cache)`);
+            } else {
+                const purchases = await Purchase.find({
+                    company: companyObjectId,
+                    provider: providerObjectId,
+                    date: { $gte: startDate, $lte: endDate }
+                })
+                    .populate({ path: 'provider', model: 'Provider', select: 'name' })
+                    .populate({ path: 'products.product', model: 'Product', select: 'name' })
+                    .exec();
+
+                await setexAsync(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(purchases));
+
+                res.json(purchases);
+                logger.info(`Purchases for provider ${providerId}. (Retrieved from database)`);
+            }
         } catch (error: any) {
             logger.error(`Error in getPurchasesForProvider: ${error.message}`);
             next(new HttpError(500, error.message));

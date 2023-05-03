@@ -8,7 +8,7 @@ import { Company } from '../models/company';
 import { Sale } from '../models/sale';
 import { Product } from '../models/product';
 import { Types } from 'mongoose';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import { getAsync, setexAsync } from '../cache';
 env.config();
 
@@ -116,7 +116,7 @@ class ProductController {
             next(new HttpError(500, error.message));
         }
     }
-    
+
     getTopProducts = async (req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> => {
         try {
             const company = req.user.company;

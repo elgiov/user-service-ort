@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import env from 'dotenv';
 import HttpError from '../errors/httpError';
 import bcrypt from 'bcrypt';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import { CustomRequest } from '../types';
 
 env.config();

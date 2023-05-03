@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import env from 'dotenv';
 import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import { checkDatabaseConnection } from '../db';
 env.config();
 class HealthController {

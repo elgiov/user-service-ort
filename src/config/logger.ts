@@ -28,6 +28,13 @@ const logger = createLogger({
     rejectionHandlers: [new transports.File({ filename: 'logs/rejections.log' })]
 });
 
+const healthCheckLogger = createLogger({
+    level: 'info',
+    format: combine(timestamp(), errors({ stack: true }), splat(), json()),
+    defaultMeta: { service: 'GestionInventario' },
+    transports: [new transports.File({ filename: 'logs/health-check.log' })]
+});
+
 //change when we launch to prod maybe
 if (process.env.NODE_ENV !== 'production') {
     logger.add(
@@ -37,4 +44,4 @@ if (process.env.NODE_ENV !== 'production') {
     );
 }
 
-export default logger;
+export { logger, healthCheckLogger };
