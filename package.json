@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build && npm run serve",
+    "start": "node --max-old-space-size=4096 dist/app.js",
     "build": "tsc",
     "serve": "node dist/app.js",
     "test": "jest"
