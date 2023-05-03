@@ -20,11 +20,12 @@ const logger = createLogger({
             zippedArchive: true,
             maxSize: '20m',
             maxFiles: '1d'
+        }),
+        new transports.Console({
+            format: combine(colorize(), timestamp(), logFormat)
         })
     ],
-
     exceptionHandlers: [new transports.File({ filename: 'logs/exceptions.log' })],
-
     rejectionHandlers: [new transports.File({ filename: 'logs/rejections.log' })]
 });
 
