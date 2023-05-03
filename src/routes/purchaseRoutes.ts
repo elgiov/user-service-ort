@@ -6,6 +6,6 @@ const router = Router();
 
 router.post('', purchaseController.createPurchase);
 //@ts-ignore
-router.get('/:providerId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), purchaseController.getPurchasesForProvider);
+router.get('/:providerId', auth.verifyToken, purchaseController.getPurchasesForProvider);
 
 export default router;
