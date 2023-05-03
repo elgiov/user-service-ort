@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { createCompany, getCompanies, getCompanyById } from '../services/companyService';
 import HttpError from '../errors/httpError';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 
 class CompanyController {
     async createCompany(req: Request, res: Response, next: NextFunction): Promise<void> {

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import jwt_decode from 'jwt-decode';
 import { Request, Response, NextFunction } from 'express';
 import { CustomRequest } from '../../types';
-import logger from '../../config/logger';
+import { logger }from '../../config/logger';
 
 export interface DecodedToken {
     role: string;

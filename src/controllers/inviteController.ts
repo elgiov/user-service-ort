@@ -5,7 +5,7 @@ import { Invite } from '../models/invite';
 import { CustomRequest } from '../types';
 import HttpError from '../errors/httpError';
 import crypto from 'crypto';
-import logger from '../config/logger';
+import { logger }from '../config/logger';
 
 class InvitationController {
     async sendInvitation(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
