@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import env from 'dotenv';
 import HttpError from '../errors/httpError';
 import { CustomRequest } from '../types';
-import { logger } from '../config/logger';
+import { healthCheckLogger } from '../config/logger';
 import { checkDatabaseConnection } from '../db';
 env.config();
 class HealthController {
@@ -10,10 +10,10 @@ class HealthController {
         const isDatabaseConnected = await checkDatabaseConnection();
 
         if (isDatabaseConnected) {
-            logger.info('Database connected');
+            healthCheckLogger.info('Database connected');
             res.status(200).json({ status: 'OK', database: 'connected' });
         } else {
-            logger.error('Database disconnected');
+            healthCheckLogger.error('Database disconnected');
             res.status(500).json({ status: 'ERROR', database: 'disconnected' });
         }
     }
