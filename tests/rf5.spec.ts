@@ -13,10 +13,7 @@ describe('Provider Controller', () => {
     let mockNext: NextFunction;
     let createProviderSpy: jest.SpyInstance;
     let getProvidersSpy: jest.SpyInstance;
-    let updateProviderSpy: jest.SpyInstance;
     let deleteProviderSpy = jest.spyOn(providerService, 'deleteProvider');
-    let getProductsByProviderSpy = jest.spyOn(providerService, 'getProviderProducts');
-    let findProviderByIdSpy = jest.spyOn(providerService, 'findProviderById');
 
     beforeEach(() => {
         mockRequestAddProvider = createMockRequest(mockProvider1Data, mockCompany1Data.id);
@@ -174,5 +171,105 @@ describe('Provider Controller', () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(mockProviders);
         expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should return an error when providerService.updateProvider() throws an error', async () => {
+        const mockRequest: Request = {
+            params: { providerId: 'mockProviderId' },
+            body: {
+                name: 'Updated Provider 1'
+            }
+        };
+
+        jest.spyOn(providerService, 'updateProvider').mockImplementation(() => {
+            throw new Error('Test error');
+        });
+
+        await providerController.updateProvider(mockRequest, mockResponse, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+        expect(mockNext).toHaveBeenCalledWith(
+            expect.objectContaining({
+                status: 500,
+                message: 'Test error'
+            })
+        );
+    });
+
+    it('should return a 404 error when updatedProvider is not found', async () => {
+        const mockRequest: Request = {
+            params: { providerId: 'mockProviderId' },
+            body: {
+                /* updated provider data */
+            }
+        };
+
+        jest.spyOn(providerService, 'updateProvider').mockResolvedValue(null);
+
+        await providerController.updateProvider(mockRequest, mockResponse, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+        expect(mockNext).toHaveBeenCalledWith(
+            expect.objectContaining({
+                status: 404,
+                message: `Provider with id "mockProviderId" not found`
+            })
+        );
+    });
+
+    it('should return a 404 error when deletedProvider is not found', async () => {
+        const mockRequest: Request = {
+            params: { providerId: 'mockProviderId' }
+        };
+
+        jest.spyOn(providerService, 'deleteProvider').mockResolvedValue(null);
+
+        await providerController.deleteProvider(mockRequest, mockResponse, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+        expect(mockNext).toHaveBeenCalledWith(
+            expect.objectContaining({
+                status: 404,
+                message: `Provider with id "mockProviderId" not found`
+            })
+        );
+    });
+
+    it('should handle errors in deleteProvider', async () => {
+        const mockRequest: Request = {
+            params: { providerId: 'mockProviderId' }
+        };
+
+        const mockError = new Error('Mock error in deleteProvider');
+        jest.spyOn(providerService, 'deleteProvider').mockRejectedValue(mockError);
+
+        await providerController.deleteProvider(mockRequest, mockResponse, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+        expect(mockNext).toHaveBeenCalledWith(
+            expect.objectContaining({
+                status: 500,
+                message: mockError.message
+            })
+        );
+    });
+
+    it('should handle errors in getProviders', async () => {
+        const mockRequest: CustomRequest<any> = {
+            user: { company: 'mockCompany' }
+        };
+
+        const mockError = new Error('Mock error in getCompanyProviders');
+        jest.spyOn(providerService, 'getProviders').mockRejectedValue(mockError);
+
+        await providerController.getProviders(mockRequest, mockResponse, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+        expect(mockNext).toHaveBeenCalledWith(
+            expect.objectContaining({
+                status: 500,
+                message: mockError.message
+            })
+        );
     });
 });
