@@ -12,6 +12,7 @@ import cors from 'cors';
 import { logger } from './config/logger';
 import healthRoutes from './routes/healthRoutes';
 import { responseTimes, register, requestsPerMinute } from './metrics';
+import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,7 +55,10 @@ app.use('/api/invites', inviteRoutes);
 app.use('/api', healthRoutes);
 
 app.use(errorHandler);
-
+app.use(express.static(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/197396-211753-205650-Frontend')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/197396-211753-205650-Frontend'));
+});
 connectDB();
 
 app.listen(PORT, () => {
