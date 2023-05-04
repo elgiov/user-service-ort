@@ -55,9 +55,9 @@ app.use('/api/invites', inviteRoutes);
 app.use('/api', healthRoutes);
 
 app.use(errorHandler);
-app.use(express.static(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/197396-211753-205650-Frontend')));
+app.use(express.static(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/gestion-inventario')));
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/197396-211753-205650-Frontend'));
+    res.sendFile(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/gestion-inventario/index.html'));
 });
 connectDB();
 
