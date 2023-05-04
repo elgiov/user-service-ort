@@ -44,7 +44,7 @@ class SaleController {
                 ? moment(req.query.endDate as string, 'YYYY-MM-DD')
                       .toISOString()
                       .substring(0, 10)
-                : moment.utc().toISOString().substring(0, 10);
+                : moment.utc().add(1, 'days').toISOString().substring(0, 10);
 
             const companyObjectId = new Types.ObjectId(company);
 
