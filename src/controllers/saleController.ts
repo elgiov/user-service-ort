@@ -57,6 +57,8 @@ class SaleController {
             });
 
             const totalPages = Math.ceil(totalSales / limit);
+            console.log(startDate)
+            console.log(endDate)
 
             const sales = await Sale.find({
                 company: companyObjectId,

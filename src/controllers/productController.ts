@@ -87,11 +87,11 @@ class ProductController {
             const company = req.user.company;
             const products = await productService.getProductsByCompany(company);
 
-            if (!products || products.length === 0) {
+           /* if (!products || products.length === 0) {
                 logger.error(`Error in getProductsByCompany: No products found for company "${company}"`);
                 return next(new HttpError(404, `No products found for company "${company}"`));
             }
-
+            */
             res.status(200).json(products);
             logger.info(`Products found for company "${company}"`);
         } catch (error: any) {

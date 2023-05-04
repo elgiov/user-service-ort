@@ -5,7 +5,7 @@ import auth from '../shared/authorization_middleware/auth';
 
 const router = Router();
 
-router.post('', auth.verifyToken, auth.authRolePermissions(["ADMIN, EMPLOYEE"]),saleController.createSale);
+router.post('', auth.verifyToken, auth.authRolePermissions(["ADMIN", "EMPLOYEE"]),saleController.createSale);
 router.get('/', auth.verifyToken, saleController.getSales);
 router.get('/by-product', auth.verifyToken, saleController.getSalesByProduct);
 
