@@ -55,9 +55,11 @@ app.use('/api/invites', inviteRoutes);
 app.use('/api', healthRoutes);
 
 app.use(errorHandler);
-app.use(express.static(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/gestion-inventario')));
+const publicPath = path.join(__dirname, '../public');
+
+app.use(express.static(publicPath));
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../197396-211753-205650-Frontend/dist/gestion-inventario/index.html'));
+    res.sendFile(path.join(publicPath, 'index.html'));
 });
 connectDB();
 
