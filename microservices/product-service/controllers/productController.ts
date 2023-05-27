@@ -1,16 +1,14 @@
+// /product-service/controllers/productController.ts
+
 import { Request, Response, NextFunction } from 'express';
-// import env from 'dotenv';
+import HttpError from '../../../shared-middleware/src/httpError';
+import { CustomRequest } from '../../../shared-middleware/src/types';
 import * as productService from '../services/productService';
 import { getCompanyById } from '../services/companyService';
-import HttpError from '../errors/httpError';
-import { CustomRequest } from '../types';
-import { Company } from '../models/company';
-import { Sale } from '../models/sale';
-import { Product } from '../models/product';
+import { logger } from '../../../shared-middleware/src/logger';
+import { getAsync, setexAsync } from '../../../shared-middleware/src/cache';
 import { Types } from 'mongoose';
-import { logger } from '../config/logger';
-import { getAsync, setexAsync } from '../cache';
-// env.config();
+import axios from 'axios';
 
 class ProductController {
     async addProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
@@ -124,83 +122,32 @@ class ProductController {
                 logger.error(`Error in getTopProducts: No company provided`);
                 throw new HttpError(401, 'No company provided');
             }
-
+    
             const cacheKey = `topProducts:${company}`;
             const cachedData = await getAsync(cacheKey);
-
+    
             if (cachedData) {
                 const topProducts = JSON.parse(cachedData);
                 res.json(topProducts);
                 logger.info(`Top products found for company "${company}" (from cache)`);
             } else {
-                await this.prePopulateCache(company);
-
-                const companyObjectId = new Types.ObjectId(company);
-
-                const results = await Sale.aggregate([
-                    { $match: { company: companyObjectId } },
-                    { $unwind: '$products' },
-                    { $group: { _id: '$products.product', totalSold: { $sum: '$products.quantity' } } },
-                    { $sort: { totalSold: -1 } },
-                    { $limit: 3 },
-                    {
-                        $lookup: {
-                            from: 'products',
-                            localField: '_id',
-                            foreignField: '_id',
-                            as: 'productData'
-                        }
-                    },
-                    { $unwind: '$productData' },
-                    {
-                        $project: {
-                            _id: 0,
-                            name: '$productData.name',
-                            totalSold: 1
-                        }
-                    }
-                ]);
-
-                res.json(results);
-                logger.info(`Top products found for company "${company}" (from database)`);
+                try {
+                    const response = await axios.get(`http://sales-service/api/sales/top-products/${company}`);
+                    const topProducts = response.data;
+                    res.json(topProducts);
+                    logger.info(`Top products found for company "${company}" (from Sales microservice)`);
+                    
+                    await setexAsync(cacheKey, 60, JSON.stringify(topProducts));
+                } catch (error: any) {
+                    logger.error(`Error in getTopProducts: Could not fetch top products from Sales microservice: ${error.message}`);
+                    next(new HttpError(500, error.message));
+                }
             }
         } catch (error: any) {
             logger.error(`Error in getTopProducts: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     };
-
-    async prePopulateCache(companyId: string): Promise<void> {
-        const cacheKey = `topProducts:${companyId}`;
-
-        const companyObjectId = new Types.ObjectId(companyId);
-
-        const results = await Sale.aggregate([
-            { $match: { company: companyObjectId } },
-            { $unwind: '$products' },
-            { $group: { _id: '$products.product', totalSold: { $sum: '$products.quantity' } } },
-            { $sort: { totalSold: -1 } },
-            { $limit: 3 },
-            {
-                $lookup: {
-                    from: 'products',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'productData'
-                }
-            },
-            { $unwind: '$productData' },
-            {
-                $project: {
-                    _id: 0,
-                    name: '$productData.name',
-                    totalSold: 1
-                }
-            }
-        ]);
-
-        await setexAsync(cacheKey, 60, JSON.stringify(results));
-    }
 }
 
 export default new ProductController();
