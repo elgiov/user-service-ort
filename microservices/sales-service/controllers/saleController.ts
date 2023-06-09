@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from 'express';
 import HttpError from '../../../shared-middleware/src/httpError';
 import { CustomRequest } from '../../../shared-middleware/src/types';
 import * as saleService from '../services/saleService';
-import { Types } from 'mongoose';
 import { logger } from '../../../shared-middleware/src/logger';
 import { getAsync, setexAsync } from '../../../shared-middleware/src/cache';
 import moment from 'moment';
@@ -57,7 +56,7 @@ class SaleController {
         }
     }
 
-    getSalesByProduct = async (req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> => {
+    async getSalesByProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const startDate = new Date(req.query.startDate as string);
             const endDate = new Date(req.query.endDate as string);
@@ -80,7 +79,7 @@ class SaleController {
             logger.error(`Error in getSalesByProduct: ${error.message}`);
             next(new HttpError(500, error.message));
         }
-    };
+    }
 }
 
 export default new SaleController();
