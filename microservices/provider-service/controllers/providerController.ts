@@ -3,6 +3,8 @@ import * as providerService from '../services/providerService';
 import HttpError from '../../../shared-middleware/src/httpError';
 import { logger } from '../../../shared-middleware/src/logger';
 import { CustomRequest } from '../types';
+import env from 'dotenv';
+env.config();
 
 class ProviderController {
     async addProvider(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
@@ -51,6 +53,22 @@ class ProviderController {
             logger.info(`Provider with id "${providerId}" deleted`);
         } catch (error: any) {
             logger.error(`Error in deleteProvider: ${error.message}`);
+            next(new HttpError(500, error.message));
+        }
+    }
+
+    async findProviderById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const providerId = req.params.providerId;
+            const provider = await providerService.findProviderById(providerId);
+            if (!provider) {
+                logger.error(`Error in findProviderById: Provider with id "${providerId}" not found`);
+                return next(new HttpError(404, `Provider with id "${providerId}" not found`));
+            }
+            res.status(200).json(provider);
+            logger.info(`Provider with id "${providerId}" found`);
+        } catch (error: any) {
+            logger.error(`Error in findProviderById: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }

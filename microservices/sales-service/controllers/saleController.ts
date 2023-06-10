@@ -1,5 +1,3 @@
-// sale-service/controllers/saleController.ts
-
 import { Request, Response, NextFunction } from 'express';
 import HttpError from '../../../shared-middleware/src/httpError';
 import { CustomRequest } from '../../../shared-middleware/src/types';
@@ -7,6 +5,8 @@ import * as saleService from '../services/saleService';
 import { logger } from '../../../shared-middleware/src/logger';
 import { getAsync, setexAsync } from '../../../shared-middleware/src/cache';
 import moment from 'moment';
+import env from 'dotenv';
+env.config();
 
 const CACHE_TTL_SECONDS = 60;
 

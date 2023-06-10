@@ -1,6 +1,7 @@
 import express from 'express';
 import companyRoutes from './routes/companyRoutes';
 import cors from 'cors';
+import { connectDB } from '../company-service/src/database';
 
 const app = express();
 app.use(cors());
@@ -20,5 +21,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/api/companies', companyRoutes);
+connectDB();
 
 app.listen(3002, () => console.log('Company service is listening on port 3002'));

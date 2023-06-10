@@ -7,6 +7,8 @@ import { CustomRequest } from '../types';
 import { Types } from 'mongoose';
 import { Purchase } from '../models/purchase';
 import { getAsync, setexAsync } from '../../../shared-middleware/src/cache';
+import env from 'dotenv';
+env.config();
 const CACHE_TTL_SECONDS = 60;
 
 class PurchaseController {

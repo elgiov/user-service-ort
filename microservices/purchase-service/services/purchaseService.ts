@@ -3,9 +3,15 @@ import { IProduct } from '../models/product';
 import { Product } from '../models/product';
 import { Purchase } from '../models/purchase';
 import { Types } from 'mongoose';
-import { findProviderById } from './providerService'
+import axios from 'axios';
+
+const baseApi = axios.create({
+    baseURL: `http://localhost:3003/api/providers`,
+    proxy: false
+})
 
 const findProductById = async (productId: string, company: Types.ObjectId): Promise<IProduct> => {
+    console.log(productId)
     const product = await Product.findOne({ _id: productId, company });
     if (!product) {
         throw new Error(`Could not find product with id "${productId}" for company "${company}"`);
@@ -16,9 +22,11 @@ const calculateTotal = (products: { quantity: number; unitPrice: number }[]): nu
     return products.reduce((total, { quantity, unitPrice }) => total + unitPrice * quantity, 0);
 };
 
+
 export const createPurchase = async (provider: string, products: { productId: string; quantity: number }[]): Promise<IPurchase> => {
     try {
-        const { company } = await findProviderById(provider);
+        const {data} = await baseApi.get(`/id/${provider}`);
+        const company  = data.company; 
         const productPromises = products.map(({ productId }) => findProductById(productId, company));
         const foundProducts = await Promise.all(productPromises);
 

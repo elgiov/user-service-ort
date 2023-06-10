@@ -1,6 +1,7 @@
 import express from 'express';
 import providerRoutes from './routes/providerRoutes';
 import cors from 'cors';
+import { connectDB } from '../provider-service/src/database';
 
 const app = express();
 app.use(cors());
@@ -20,5 +21,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/api/providers', providerRoutes);
+connectDB();
 
 app.listen(3003, () => console.log('Provider service is listening on port 3003'));
