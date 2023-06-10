@@ -1,6 +1,7 @@
 import express from 'express';
 import saleRoutes from './routes/saleRoutes';
 import cors from 'cors';
+import { connectDB } from '../sales-service/src/database';
 
 const app = express();
 app.use(cors());
@@ -18,5 +19,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/api/sales', saleRoutes);
+connectDB();
 
 app.listen(3001, () => console.log('Sale service is listening on port 3001'));

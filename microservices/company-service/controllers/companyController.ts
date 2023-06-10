@@ -1,6 +1,6 @@
 // controllers/companyController.ts
 import { Request, Response, NextFunction } from 'express';
-import { createCompany, getCompanies, getCompanyById } from '../services/companyService';
+import { createCompany, getCompanies, getCompanyById, getCompanyByName } from '../services/companyService';
 import HttpError from '../../../shared-middleware/src/httpError';
 import { logger } from '../../../shared-middleware/src/logger';
 
@@ -25,6 +25,18 @@ class CompanyController {
             logger.info(`Company with id: ${id} found`);
         } catch (error: any) {
             logger.error(`Error in getCompanyById: ${error.message}`);
+            next(new HttpError(500, error.message));
+        }
+    }
+
+    async getCompanyByName(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const {name} = req.params;
+            const company = await getCompanyByName(name);
+            res.status(200).json(company);
+            logger.info(`Get Company with name: ${name}`);
+        } catch (error: any) {
+            logger.error(`Error in getCompanyByName: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }
