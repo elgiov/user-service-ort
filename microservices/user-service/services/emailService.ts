@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+import axios from 'axios';
 import { Company } from '../models/company';
 
 const SENDGRID_API_KEY = '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';
@@ -11,6 +12,11 @@ interface SendInvitationEmailOptions {
     invitationLink: string;
 }
 
+interface SendProductSoldEmailOptions {
+    to: string;
+    productId: string;
+}
+
 export async function sendInvitationEmail({ to, company, invitationLink }: SendInvitationEmailOptions): Promise<void> {
     const companyFromDB = await Company.findById(company).select('name');
     if (!companyFromDB) {
@@ -21,6 +27,27 @@ export async function sendInvitationEmail({ to, company, invitationLink }: SendI
         from: 'gioghisellini@gmail.com',
         subject: 'Invitación para unirse a ' + companyFromDB.name,
         text: `Ha sido invitado a unirse a la empresa "${companyFromDB.name}" en nuestra plataforma. Por favor, haga click en el enlace de abajo para registrarse y unirse a la empresa:\n\n${invitationLink}\n\nSi no solicitó esta invitación, ignore este correo electrónico.`
+    };
+    await sgMail
+        .send(msg)
+        .then(() => {
+            console.log('Email sent');
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
+
+export async function sendProductSoldEmail({ to, productId }: SendProductSoldEmailOptions): Promise<void> {
+    const productFromDB: { name: string } = await axios.get(`http://localhost:3000/api/products/${productId}`);
+    if (!productFromDB) {
+        throw new Error('Product not found');
+    }
+    const msg = {
+        to,
+        from: 'gioghisellini@gmail.com',
+        subject: 'Product Sold Notification',
+        text: `The product "${productFromDB.name}" has been sold. Check the inventory for stock details.`
     };
     await sgMail
         .send(msg)

@@ -8,10 +8,17 @@
     "serve": "node dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --max-old-space-size=4096 dist/microservices/company-service/app.js",
+    "start:dev": "concurrently \"tsc -w\" \"nodemon dist/microservices/company-service/app.js\"",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "node --max-old-space-size=4096 dist/microservices/company-service/app.js",
     "start:frontend": "cd ../197396-211753-205650-Frontend/Frontend/GestionInventario && npm start"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
 }
