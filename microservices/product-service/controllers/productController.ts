@@ -1,5 +1,3 @@
-// /product-service/controllers/productController.ts
-
 import { Request, Response, NextFunction } from 'express';
 import HttpError from '../../../shared-middleware/src/httpError';
 import { CustomRequest } from '../../../shared-middleware/src/types';
@@ -9,6 +7,8 @@ import { logger } from '../../../shared-middleware/src/logger';
 import { getAsync, setexAsync } from '../../../shared-middleware/src/cache';
 import { Types } from 'mongoose';
 import axios from 'axios';
+import env from 'dotenv';
+env.config();
 
 class ProductController {
     async addProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {

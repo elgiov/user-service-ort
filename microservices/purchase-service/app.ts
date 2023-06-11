@@ -1,6 +1,8 @@
 import express from 'express';
 import purchaseRoutes from './routes/purchaseRoutes';
 import cors from 'cors';
+import { connectDB } from '../purchase-service/src/database';
+
 
 const app = express();
 app.use(cors());
@@ -20,5 +22,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/api/purchases', purchaseRoutes);
+connectDB();
 
 app.listen(3004, () => console.log('Purchase service is listening on port 3004'));

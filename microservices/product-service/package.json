@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node --max-old-space-size=4096 dist/product-service/app.js",
+    "start": "node --max-old-space-size=4096 dist/microservices/product-service/app.js",
     "start:dev": "nodemon --max-old-space-size=4096 dist/app.js",
     "build": "tsc",
     "serve": "node dist/app.js",
     "test": "jest",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "start:backend": "node --max-old-space-size=4096 dist/app.js",
+    "start:backend": "node --max-old-space-size=4096 dist/microservices/product-service/app.js",
     "start:frontend": "cd ../197396-211753-205650-Frontend/Frontend/GestionInventario && npm start"
   },
   "keywords": [],

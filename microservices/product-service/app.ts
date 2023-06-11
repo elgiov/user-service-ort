@@ -1,26 +1,24 @@
 import express from 'express';
-import bodyParser from 'body-parser';
-import { decreaseProductQuantity, getProductById } from './services/productService';
+import cors from 'cors';
+import productRoutes from './routes/productRoutes';
+import { connectDB } from '../sales-service/src/database';
 
 const app = express();
-app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json());
 
-app.get('/api/products/:id', async (req, res) => {
-    try {
-        const product = await getProductById(req.params.id);
-        res.json(product);
-    } catch (error: any) {
-        res.status(404).send({ error: error.message });
-    }
+app.use(function (req, res, next) {
+    //Enabling CORS
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
+    res.header(
+        'Access-Control-Allow-Headers',
+        'Referrer-Policy, Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization, cache-control'
+    );
+    next();
 });
 
-app.post('/api/products/:id/decrease-quantity', async (req, res) => {
-    try {
-        await decreaseProductQuantity(req.params.id, req.body.quantity);
-        res.sendStatus(200);
-    } catch (error: any) {
-        res.status(400).send({ error: error.message });
-    }
-});
+app.use('/api/products', productRoutes);
+connectDB();
 
 app.listen(3000, () => console.log('Product service is listening on port 3000'));
