@@ -85,13 +85,13 @@ class ProductController {
             const company = req.user.company;
             const products = await productService.getProductsByCompany(company);
 
-           /* if (!products || products.length === 0) {
+            /* if (!products || products.length === 0) {
                 logger.error(`Error in getProductsByCompany: No products found for company "${company}"`);
                 return next(new HttpError(404, `No products found for company "${company}"`));
             }
             */
-            res.status(200).json(products);
-            logger.info(`Products found for company "${company}"`);
+            res.status(200).json(`Products found for company "${company}". The products are: ${products.map((product) => product.name)}`);
+            logger.info(`Products found for company "${company}". The products are: ${products}`);
         } catch (error: any) {
             logger.error(`Error in getProductsByCompany: ${error.message}`);
             next(new HttpError(500, error.message));
@@ -122,10 +122,10 @@ class ProductController {
                 logger.error(`Error in getTopProducts: No company provided`);
                 throw new HttpError(401, 'No company provided');
             }
-    
+
             const cacheKey = `topProducts:${company}`;
             const cachedData = await getAsync(cacheKey);
-    
+
             if (cachedData) {
                 const topProducts = JSON.parse(cachedData);
                 res.json(topProducts);
@@ -136,7 +136,7 @@ class ProductController {
                     const topProducts = response.data;
                     res.json(topProducts);
                     logger.info(`Top products found for company "${company}" (from Sales microservice)`);
-                    
+
                     await setexAsync(cacheKey, 60, JSON.stringify(topProducts));
                 } catch (error: any) {
                     logger.error(`Error in getTopProducts: Could not fetch top products from Sales microservice: ${error.message}`);

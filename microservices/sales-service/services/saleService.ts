@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { Types } from 'mongoose';
 import { ISale, Sale } from '../models/sale';
+import { IProductSubscription, ProductSubscription } from '../models/productSubscription';
+import { sendProductSoldEmail } from '../../user-service/services/emailService';
 
 const findProductById = async (productId: string): Promise<{ id: string; price: number }> => {
     try {
@@ -45,6 +47,14 @@ export const createSale = async (company: Types.ObjectId, products: { productId:
         const today = new Date();
         const sale = new Sale({ company, total, products: saleProducts, date: today, client });
         await sale.save();
+
+        for (const saleProduct of saleProducts) {
+            const { product: productId } = saleProduct;
+            const subscriptions = await ProductSubscription.find({ productId: productId });
+            for (const subscription of subscriptions) {
+                await sendProductSoldEmail({ to: subscription.adminId, productId });
+            }
+        }
 
         return sale;
     } catch (error: any) {
@@ -151,4 +161,14 @@ export const getSalesByProduct = async (company: string, startDate: Date, endDat
     } catch (error: any) {
         throw new Error(`Could not fetch sales by product: ${error.message}`);
     }
+};
+
+export const subscribeToProduct = async (adminId: string, productId: string): Promise<IProductSubscription> => {
+    const subscription = new ProductSubscription({ adminId, productId });
+    await subscription.save();
+    return subscription;
+};
+
+export const unsubscribeFromProduct = async (adminId: string, productId: string): Promise<void> => {
+    await ProductSubscription.deleteOne({ adminId, productId });
 };

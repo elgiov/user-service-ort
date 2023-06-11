@@ -80,6 +80,32 @@ class SaleController {
             next(new HttpError(500, error.message));
         }
     }
+
+    async subscribeToProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const adminId = req.user.id;
+            const productId = req.params.productId;
+            await saleService.subscribeToProduct(adminId, productId);
+            res.json({ message: 'Subscription successful.' });
+            logger.info(`Admin subscribed to product`);
+        } catch (error: any) {
+            logger.error(`Error in subscribeToProduct: ${error.message}`);
+            next(new HttpError(400, error.message));
+        }
+    }
+
+    async unsubscribeFromProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const adminId = req.user.id;
+            const productId = req.params.productId;
+            await saleService.unsubscribeFromProduct(adminId, productId);
+            res.json({ message: 'Unsubscription successful.' });
+            logger.info(`Admin unsubscribed from product`);
+        } catch (error: any) {
+            logger.error(`Error in unsubscribeFromProduct: ${error.message}`);
+            next(new HttpError(400, error.message));
+        }
+    }
 }
 
 export default new SaleController();
