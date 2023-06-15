@@ -14,7 +14,7 @@ export interface ISale extends Document {
     client: string;
 }
 
-const ProductSaleSchema = new Schema<IProductSale>(
+export const ProductSaleSchema = new Schema<IProductSale>(
     {
         productId: { type: String, required: true },
         quantity: { type: Number, required: true },

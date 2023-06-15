@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Types } from 'mongoose';
 import { ISale, Sale } from '../models/sale';
-import { IProductSubscription, ProductSubscription } from '../models/productSubscription';
+import { IScheduledSale, ScheduledSale } from '../models/scheduledSales';
+import schedule from 'node-schedule';
 import { sendProductSoldEmail } from '../../user-service/services/emailService';
 
 const findProductById = async (productId: string): Promise<{ id: string; price: number }> => {
@@ -25,7 +26,7 @@ const calculateTotalAmount = (products: { quantity: number; unitPrice: number }[
     return products.reduce((total, { quantity, unitPrice }) => total + unitPrice * quantity, 0);
 };
 
-export const createSale = async (company: Types.ObjectId, products: { productId: string; quantity: number }[], client: string): Promise<ISale> => {
+export const createSale = async (company: Types.ObjectId, products: { productId: string; quantity: number }[], client: string, adminId: string): Promise<ISale> => {
     try {
         const productPromises = products.map(({ productId }) => findProductById(productId));
         const foundProducts = await Promise.all(productPromises);
@@ -48,11 +49,10 @@ export const createSale = async (company: Types.ObjectId, products: { productId:
         const sale = new Sale({ company, total, products: saleProducts, date: today, client });
         await sale.save();
 
-        for (const saleProduct of saleProducts) {
-            const { product: productId } = saleProduct;
-            const subscriptions = await ProductSubscription.find({ productId: productId });
-            for (const subscription of subscriptions) {
-                await sendProductSoldEmail({ to: subscription.adminId, productId });
+        for (const product of saleProducts) {
+            const hasSubscription = await checkProductSubscription(product.product, adminId);
+            if (hasSubscription) {
+                await notifyAdmin(product.product, adminId);
             }
         }
 
@@ -60,6 +60,20 @@ export const createSale = async (company: Types.ObjectId, products: { productId:
     } catch (error: any) {
         throw new Error(`Could not create sale: ${error.message}`);
     }
+};
+
+const checkProductSubscription = async (productId: string, adminId: string): Promise<boolean> => {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/is-subscribed/${productId}/${adminId}`);
+        return response.data.isSubscribed;
+    } catch (error: any) {
+        throw new Error(`Could not check product subscription: ${error.message}`);
+    }
+};
+
+const notifyAdmin = async (productId: string, adminId: string): Promise<void> => {
+    await sendProductSoldEmail({ to: adminId, productId });
+    console.log(`Sending email to admin ${adminId} about product ${productId}`);
 };
 
 export const getSales = async (company: string, page: number, limit: number, startDate: string, endDate: string) => {
@@ -163,12 +177,26 @@ export const getSalesByProduct = async (company: string, startDate: Date, endDat
     }
 };
 
-export const subscribeToProduct = async (adminId: string, productId: string): Promise<IProductSubscription> => {
-    const subscription = new ProductSubscription({ adminId, productId });
-    await subscription.save();
-    return subscription;
+export const scheduleSale = async (company: Types.ObjectId, products: any[], client: string, scheduledDate: Date, adminId: string): Promise<IScheduledSale> => {
+    const total = calculateTotalAmount(products) as number;
+    const scheduledSale = new ScheduledSale({ company, total, products, date: new Date(), client, scheduledDate, adminId });
+    await scheduledSale.save();
+
+    schedule.scheduleJob(scheduledDate, async () => {
+        await triggerScheduledSale(scheduledSale.id);
+    });
+
+    return scheduledSale;
 };
 
-export const unsubscribeFromProduct = async (adminId: string, productId: string): Promise<void> => {
-    await ProductSubscription.deleteOne({ adminId, productId });
+export const triggerScheduledSale = async (scheduledSaleId: Types.ObjectId): Promise<ISale> => {
+    const scheduledSale = await ScheduledSale.findById(scheduledSaleId);
+    if (!scheduledSale) throw new Error('Scheduled sale not found');
+
+    const { companyId, products, client, adminId } = scheduledSale;
+    const sale = await createSale(new Types.ObjectId(companyId), products, client, adminId);
+
+    await ScheduledSale.deleteOne({ _id: scheduledSaleId });
+
+    return sale;
 };

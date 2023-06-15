@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongoose';
 import { Product, IProduct } from '../models/product';
+import { ProductSubscription } from '../models/productSubscription';
 import { uploadToS3 } from '../../upload-service/s3-upload';
 
 export const createProduct = async ({ name, description, image, price, quantity, company }: IProduct): Promise<IProduct> => {
@@ -99,3 +100,29 @@ export const getProductById = async (id: string): Promise<IProduct | null> => {
         throw new Error(`Could not get product with id "${id}": ${error.message}`);
     }
 };
+
+export async function subscribeToProduct(adminId: any, productId: string) {
+    try {
+        const productSubscription = new ProductSubscription({ adminId, productId });
+        await productSubscription.save();
+    } catch (error) {
+        throw new Error('Could not subscribe to product');
+    }
+}
+
+export async function unsubscribeFromProduct(adminId: any, productId: string) {
+    try {
+        await ProductSubscription.findOneAndDelete({ adminId, productId });
+    } catch (error) {
+        throw new Error('Could not unsubscribe from product');
+    }
+}
+
+export async function isSubscribedToProduct(adminId: any, productId: string) {
+    try {
+        const productSubscription = await ProductSubscription.findOne({ adminId, productId });
+        return !!productSubscription;
+    } catch (error) {
+        throw new Error('Could not check if subscribed to product');
+    }
+}
