@@ -33,7 +33,7 @@ class PurchaseController {
                 throw new HttpError(401, 'No company provided');
             }
 
-            const companyObjectId = new Types.ObjectId(company);
+            //const companyObjectId = new Types.ObjectId(company);
             const providerId = req.params.providerId;
             const providerObjectId = new Types.ObjectId(providerId);
             const startDate = new Date(req.query.startDate as string);
@@ -48,7 +48,7 @@ class PurchaseController {
                 logger.info(`Purchases for provider ${providerId}. (Retrieved from cache)`);
             } else {
                 const purchases = await Purchase.find({
-                    company: companyObjectId,
+                    company: company,
                     provider: providerObjectId,
                     date: { $gte: startDate, $lte: endDate }
                 })

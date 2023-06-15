@@ -5,7 +5,7 @@ import { IProduct } from './product';
 export interface IPurchase extends Document {
     provider: Types.ObjectId;
     products: { product: Types.ObjectId; quantity: number }[];
-    company: ICompany['_id'];
+    company: string;
     date: Date;
     total: number;
 }
@@ -18,7 +18,7 @@ const purchaseSchema = new Schema<IPurchase>({
             quantity: { type: Number, required: true }
         }
     ],
-    company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
+    company: { type: String, required: true }, // now this is a string, no longer a Schema.Types.ObjectId
     date: { type: Date, required: true },
     total: { type: Number, required: true }
 });

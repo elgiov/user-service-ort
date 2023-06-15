@@ -85,12 +85,12 @@ class ProductController {
             const company = req.user.company;
             const products = await productService.getProductsByCompany(company);
 
-            /* if (!products || products.length === 0) {
+            if (!products || products.length === 0) {
                 logger.error(`Error in getProductsByCompany: No products found for company "${company}"`);
                 return next(new HttpError(404, `No products found for company "${company}"`));
             }
-            */
-            res.status(200).json(`Products found for company "${company}". The products are: ${products.map((product) => product.name)}`);
+            
+            res.status(200).json(products);
             logger.info(`Products found for company "${company}". The products are: ${products}`);
         } catch (error: any) {
             logger.error(`Error in getProductsByCompany: ${error.message}`);
@@ -132,7 +132,7 @@ class ProductController {
                 logger.info(`Top products found for company "${company}" (from cache)`);
             } else {
                 try {
-                    const response = await axios.get(`http://sales-service/api/sales/top-products/${company}`);
+                    const response = await axios.get(`http://localhost:3001/api/sales/top-products/${company}`);
                     const topProducts = response.data;
                     res.json(topProducts);
                     logger.info(`Top products found for company "${company}" (from Sales microservice)`);

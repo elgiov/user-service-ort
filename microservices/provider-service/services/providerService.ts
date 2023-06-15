@@ -1,5 +1,7 @@
+import { ObjectId } from 'mongoose';
 import { IProduct, Product } from '../models/product';
 import { Provider, IProvider } from '../models/provider';
+import mongoose from 'mongoose';
 
 export const createProvider = async ({ name, address, email, phone }: IProvider, company: string): Promise<IProvider> => {
     try {
@@ -46,9 +48,9 @@ export const getProviderProducts = async (provider: IProvider, company: string):
     }
 };
 
-export const getProviders = async (company: string): Promise<IProvider[]> => {
+export const getProviders = async (company: ObjectId): Promise<IProvider[]> => {
     try {
-        const providers = await Provider.find({ company: company, deleted: false }).populate('company', 'name');
+        const providers = await Provider.find({ company, deleted: false }).populate('company', 'name');
         return providers;
     } catch (error: any) {
         throw new Error(`Could not get providers: ${error.message}`);

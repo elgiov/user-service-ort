@@ -24,7 +24,8 @@ class InvitationController {
 
             await invite.save();
 
-            const invitationLink = `https://gestion-inventario-ort.herokuapp.com/register?token=${token}`;
+            //const invitationLink = `https://gestion-inventario-ort.herokuapp.com/register?token=${token}`; ONLY FOR PRODUCTION
+            const invitationLink = `http://localhost:4200/register?token=${token}`;
             await sendInvitationEmail({ to: email, company, invitationLink });
 
             res.status(200).json({ message: 'Invitation sent successfully' });

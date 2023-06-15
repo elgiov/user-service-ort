@@ -19,6 +19,9 @@ export const createUser = async ({ name, email, password, company, role, token }
             role = invite.role;
             company = invite.company;
         }
+        else{
+        //TRAERME LA COMPANY SI NO ES ID SOLO SI ES NOMBRE
+        }
         const newUser = new User({ name, email, password, company, role });
         const user = await newUser.save();
 
