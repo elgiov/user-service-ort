@@ -7,6 +7,8 @@ const router = Router();
 
 router.post('/', auth.verifyToken, saleController.createSale);
 router.get('/', auth.verifyToken, saleController.getSales);
-router.get('/top-products/:company', auth.verifyToken, saleController.getSalesByProduct);
+router.get('/top-products/:company', saleController.getSalesByProduct);
+router.post('/subscribe/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), saleController.subscribeToProduct);
+router.delete('/unsubscribe/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), saleController.unsubscribeFromProduct);
 router.post('/schedule', auth.verifyToken, saleController.scheduleSale);
 export default router;

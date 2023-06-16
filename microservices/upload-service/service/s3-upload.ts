@@ -1,18 +1,23 @@
-import AWS from 'aws-sdk';
-
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION
-});
+import * as AWS from 'aws-sdk';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 export const uploadToS3 = async (buffer: Buffer, key: string, contentType: string): Promise<string> => {
-    if (!process.env.AWS_S3_BUCKET_NAME) {
+    console.log("entre a s3");
+    console.log(process.env.PEPE)
+    console.log(process.env.AWS_ACCESS_KEY_ID)
+
+    const s3 = new AWS.S3({
+        accessKeyId: 'AKIAUATXHGQ3Y57JHSZP',
+        secretAccessKey: '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',
+        region: 'us-east-1'
+    });
+    /*if (!process.env.AWS_S3_BUCKET_NAME) {
         throw new Error('AWS_S3_BUCKET_NAME environment variable is not set');
-    }
+    }*/
 
     const params = {
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Bucket: 'electro-inventory',
         Key: key,
         Body: buffer,
         ContentType: contentType,
@@ -40,7 +45,7 @@ export const uploadToS3 = async (buffer: Buffer, key: string, contentType: strin
     });
 };
 
-export const getImageFromS3 = async (key: string): Promise<Buffer> => {
+/*export const getImageFromS3 = async (key: string): Promise<Buffer> => {
     if (!process.env.AWS_S3_BUCKET_NAME) {
         throw new Error('AWS_S3_BUCKET_NAME environment variable is not set');
     }
@@ -60,3 +65,4 @@ export const getImageFromS3 = async (key: string): Promise<Buffer> => {
         });
     });
 };
+*/

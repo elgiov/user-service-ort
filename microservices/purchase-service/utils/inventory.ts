@@ -1,8 +1,8 @@
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import { Product } from '../models/product';
 import HttpError from '../../../shared-middleware/src/httpError';
 
-const updateProductInventory = async (productId: string, quantity: number, isSale: boolean, company: Types.ObjectId): Promise<void> => {
+const updateProductInventory = async (productId: string, quantity: number, isSale: boolean, company: string): Promise<void> => {
     const product = await Product.findOne({ _id: productId, company });
     if (!product) {
         throw new HttpError(404, `Product with id "${productId}" not found`);
@@ -16,6 +16,6 @@ const updateProductInventory = async (productId: string, quantity: number, isSal
     await product.save();
 };
 
-export const updateInventoryAfterPurchase = async (products: { productId: string; quantity: number }[], company: Types.ObjectId): Promise<void> => {
+export const updateInventoryAfterPurchase = async (products: { productId: string; quantity: number }[], company: string): Promise<void> => {
     await Promise.all(products.map(({ productId, quantity }) => updateProductInventory(productId, quantity, false, company)));
 };

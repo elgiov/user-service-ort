@@ -7,7 +7,7 @@ import { sendProductSoldEmail } from '../../user-service/services/emailService';
 
 const findProductById = async (productId: string): Promise<{ id: string; price: number }> => {
     try {
-        const response = await axios.get(`http://product-service/api/products/${productId}`);
+        const response = await axios.get(`http://localhost:3000/api/products/${productId}`);
         return { id: response.data.id, price: response.data.price };
     } catch (error) {
         throw new Error(`Product with id "${productId}" not found`);
@@ -16,7 +16,7 @@ const findProductById = async (productId: string): Promise<{ id: string; price: 
 
 const decreaseProductQuantity = async (productId: string, quantity: number): Promise<void> => {
     try {
-        await axios.post(`http://product-service/api/products/${productId}/decrease-quantity`, { quantity });
+        await axios.post(`http://localhost:3000/api/products/${productId}/decrease-quantity`, { quantity });
     } catch (error) {
         throw new Error(`Insufficient stock for product with id "${productId}"`);
     }
@@ -30,7 +30,6 @@ export const createSale = async (company: Types.ObjectId, products: { productId:
     try {
         const productPromises = products.map(({ productId }) => findProductById(productId));
         const foundProducts = await Promise.all(productPromises);
-
         const saleProducts = foundProducts.map((product, index) => {
             const { quantity } = products[index];
             const unitPrice = product.price;

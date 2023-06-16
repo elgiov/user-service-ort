@@ -2,7 +2,7 @@ import { IPurchase } from '../models/purchase';
 import { IProduct } from '../models/product';
 import { Product } from '../models/product';
 import { Purchase } from '../models/purchase';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import axios from 'axios';
 
 const baseApi = axios.create({
@@ -10,9 +10,8 @@ const baseApi = axios.create({
     proxy: false
 });
 
-const findProductById = async (productId: string, company: Types.ObjectId): Promise<IProduct> => {
-    console.log(productId);
-    const product = await Product.findOne({ _id: productId, company });
+const findProductById = async (productId: string, company: ObjectId): Promise<IProduct> => {
+    const product = await Product.findOne({ _id: productId, company: company });
     if (!product) {
         throw new Error(`Could not find product with id "${productId}" for company "${company}"`);
     }

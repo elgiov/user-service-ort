@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongoose';
 import { Product, IProduct } from '../models/product';
+import { uploadToS3 } from '../../upload-service/service/s3-upload';
 import { ProductSubscription } from '../models/productSubscription';
-import { uploadToS3 } from '../../upload-service/s3-upload';
 
 export const createProduct = async ({ name, description, image, price, quantity, company }: IProduct): Promise<IProduct> => {
     try {

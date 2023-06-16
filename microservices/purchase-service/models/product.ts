@@ -7,7 +7,7 @@ export interface IProduct extends Document {
     image: string;
     price: number;
     quantity: number;
-    company: ICompany['_id'];
+    company: string; // Now, we just need the ID of the company, it should be string type
     deleted: boolean;
 }
 
@@ -21,7 +21,7 @@ const productSchema = new Schema<IProduct>(
         price: { type: Number, required: true },
         quantity: { type: Number, required: true },
         deleted: { type: Boolean, default: false },
-        company: { type: Schema.Types.ObjectId, ref: 'Company', required: true }
+        company: { type: String, required: true } // now this is a string, no longer a Schema.Types.ObjectId
     },
     {
         timestamps: true
