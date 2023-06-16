@@ -10,9 +10,11 @@ router.post('/add', auth.verifyToken, auth.authRolePermissions(['ADMIN']), multe
 router.put('/:name', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.updateProduct);
 router.get('/top', auth.verifyToken, productController.getTopProducts);
 router.get('/:name', auth.verifyToken, productController.getProduct);
+router.get('/byId/:id', productController.getProductById);
+router.post('/decrease-quantity/:id', productController.decreaseProductStock);
 router.get('/', auth.verifyToken, productController.getProductsByCompany);
 router.delete('/:name', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.deleteProduct);
 router.post('/subscribe/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.subscribeToProduct);
-router.delete('/unsubscribe/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.unsubscribeProduct);
-router.get('/is-subscribed/:productId/:adminId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.isSubscribedToProduct);
+router.delete('/unsubscribe/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.unsubscribeFromProduct);
+router.get('/is-subscribed/:productId/:adminId', productController.isSubscribedToProduct);
 export default router;

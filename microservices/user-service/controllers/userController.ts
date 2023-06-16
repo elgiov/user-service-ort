@@ -145,7 +145,8 @@ class UserController {
             const role = user?.role;
             const name = user?.name;
             const company = user?.company;
-            const tokenPayload = { email, role, name, company };
+            const idUser = user?.id;
+            const tokenPayload = { email, role, name, company, idUser };
             const token = jwt.sign(tokenPayload, privateKey, { algorithm: 'RS256', expiresIn: '1h' });
             res.status(200).json({ userToken: token });
             logger.info(`User logged in: ${user?.name}`);

@@ -14,7 +14,7 @@ class SaleController {
     async createSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const company = req.user.company;
-            const adminId = req.user.id;
+            const adminId = req.user.idUser;
             const { products, client } = req.body;
             const newSale = await saleService.createSale(company, products, client, adminId);
             res.status(201).json(newSale);

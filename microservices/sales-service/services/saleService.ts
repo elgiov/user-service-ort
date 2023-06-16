@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import { ISale, Sale } from '../models/sale';
 import { IScheduledSale, ScheduledSale } from '../models/scheduledSales';
 import schedule from 'node-schedule';
@@ -7,8 +7,8 @@ import { sendProductSoldEmail } from '../../user-service/services/emailService';
 
 const findProductById = async (productId: string): Promise<{ id: string; price: number }> => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/products/${productId}`);
-        return { id: response.data.id, price: response.data.price };
+        const response = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
+        return { id: response.data._id, price: response.data.price };
     } catch (error) {
         throw new Error(`Product with id "${productId}" not found`);
     }
@@ -16,7 +16,7 @@ const findProductById = async (productId: string): Promise<{ id: string; price: 
 
 const decreaseProductQuantity = async (productId: string, quantity: number): Promise<void> => {
     try {
-        await axios.post(`http://localhost:3000/api/products/${productId}/decrease-quantity`, { quantity });
+        await axios.post(`http://localhost:3000/api/products/decrease-quantity/${productId}`, { quantity });
     } catch (error) {
         throw new Error(`Insufficient stock for product with id "${productId}"`);
     }
@@ -33,25 +33,23 @@ export const createSale = async (company: Types.ObjectId, products: { productId:
         const saleProducts = foundProducts.map((product, index) => {
             const { quantity } = products[index];
             const unitPrice = product.price;
-            return { product: product.id, quantity, unitPrice };
+            return { productId: product.id, quantity, unitPrice };
         });
 
         // Check stock for each product
         for (const product of saleProducts) {
-            const { product: productId, quantity } = product;
-            await decreaseProductQuantity(productId, quantity);
+            await decreaseProductQuantity(product.productId, product.quantity);
         }
 
         const total = calculateTotalAmount(saleProducts) as number;
-
         const today = new Date();
-        const sale = new Sale({ company, total, products: saleProducts, date: today, client });
+        const sale = new Sale({  companyId: company, total, products: saleProducts, date: today, client });
         await sale.save();
 
         for (const product of saleProducts) {
-            const hasSubscription = await checkProductSubscription(product.product, adminId);
+            const hasSubscription = await checkProductSubscription(product.productId, adminId);
             if (hasSubscription) {
-                await notifyAdmin(product.product, adminId);
+                await notifyAdmin(product.productId, adminId);
             }
         }
 
@@ -63,7 +61,7 @@ export const createSale = async (company: Types.ObjectId, products: { productId:
 
 const checkProductSubscription = async (productId: string, adminId: string): Promise<boolean> => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/is-subscribed/${productId}/${adminId}`);
+        const response = await axios.get(`http://localhost:3000/api/products/is-subscribed/${productId}/${adminId}`);
         return response.data.isSubscribed;
     } catch (error: any) {
         throw new Error(`Could not check product subscription: ${error.message}`);

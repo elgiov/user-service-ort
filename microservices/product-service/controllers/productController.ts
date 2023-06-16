@@ -80,6 +80,24 @@ class ProductController {
         }
     }
 
+    async getProductById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const product = await productService.getProductById(id);
+
+            if (!product) {
+                logger.error(`Error in getProduct: Product with id "${id}"`);
+                return next(new HttpError(404, `Product with id "${id}"`));
+            }
+
+            res.status(200).json(product);
+            logger.info(`Product with id "${id}"`);
+        } catch (error: any) {
+            logger.error(`Error in getProduct: ${error.message}`);
+            next(new HttpError(500, error.message));
+        }
+    }
+
     async getProductsByCompany(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const company = req.user.company;
@@ -151,7 +169,7 @@ class ProductController {
 
     async subscribeToProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const adminId = req.user.id;
+            const adminId = req.user.idUser;
             const productId = req.params.productId;
             await productService.subscribeToProduct(adminId, productId);
             res.json({ message: 'Subscription successful.' });
@@ -164,7 +182,7 @@ class ProductController {
 
     async unsubscribeFromProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const adminId = req.user.id;
+            const adminId = req.user.idUser;
             const productId = req.params.productId;
             await productService.unsubscribeFromProduct(adminId, productId);
             res.json({ message: 'Unsubscription successful.' });
@@ -184,6 +202,18 @@ class ProductController {
             logger.info(`Admin is subscribed to product`);
         } catch (error: any) {
             logger.error(`Error in isSubscribedToProduct: ${error.message}`);
+            next(new HttpError(400, error.message));
+        }
+    }
+
+    async decreaseProductStock (req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const productId = req.params.id;
+            const {quantity} = req.body;
+            await productService.decreaseProductQuantity(productId,quantity);
+            res.json({ message: 'Decrease successful.' });
+        } catch (error: any) {
+            logger.error(`Error in decreaseProductStock: ${error.message}`);
             next(new HttpError(400, error.message));
         }
     }
