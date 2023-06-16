@@ -8,10 +8,10 @@ export interface IProductSubscription extends Document {
 const ProductSubscriptionSchema = new Schema<IProductSubscription>(
     {
         adminId: { type: String, required: true },
-        productId: { type: String, required: true },
+        productId: { type: String, required: true }
     },
     {
-        timestamps: true,
+        timestamps: true
     }
 );
 
