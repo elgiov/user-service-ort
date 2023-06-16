@@ -14,8 +14,9 @@ class SaleController {
     async createSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const company = req.user.company;
+            const adminId = req.user.id;
             const { products, client } = req.body;
-            const newSale = await saleService.createSale(company, products, client);
+            const newSale = await saleService.createSale(company, products, client, adminId);
             res.status(201).json(newSale);
             logger.info(`New sale created`);
         } catch (error: any) {
@@ -81,28 +82,16 @@ class SaleController {
         }
     }
 
-    async subscribeToProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+    async scheduleSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
+            const company = req.user.company;
             const adminId = req.user.id;
-            const productId = req.params.productId;
-            await saleService.subscribeToProduct(adminId, productId);
-            res.json({ message: 'Subscription successful.' });
-            logger.info(`Admin subscribed to product`);
+            const { products, client, scheduledDate } = req.body;
+            const scheduledSale = await saleService.scheduleSale(company, products, client, new Date(scheduledDate), adminId);
+            res.status(201).json(scheduledSale);
+            logger.info(`Sale scheduled`);
         } catch (error: any) {
-            logger.error(`Error in subscribeToProduct: ${error.message}`);
-            next(new HttpError(400, error.message));
-        }
-    }
-
-    async unsubscribeFromProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const adminId = req.user.id;
-            const productId = req.params.productId;
-            await saleService.unsubscribeFromProduct(adminId, productId);
-            res.json({ message: 'Unsubscription successful.' });
-            logger.info(`Admin unsubscribed from product`);
-        } catch (error: any) {
-            logger.error(`Error in unsubscribeFromProduct: ${error.message}`);
+            logger.error(`Error in scheduleSale: ${error.message}`);
             next(new HttpError(400, error.message));
         }
     }
