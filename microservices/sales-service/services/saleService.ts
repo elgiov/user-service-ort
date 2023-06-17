@@ -72,7 +72,6 @@ const notifyAdmins = async (productId: string): Promise<void> => {
 
 export const getSales = async (company: string, page: number, limit: number, startDate: string, endDate: string) => {
     try {
-
         const totalSales = await Sale.countDocuments({
             companyId: company,
             date: {
@@ -121,64 +120,40 @@ export const getSales = async (company: string, page: number, limit: number, sta
     }
 };
 
-export const getSalesByProduct = async (company: string, startDate: Date, endDate: Date): Promise<any> => {
-    try {
-        const salesByProduct = await Sale.aggregate([
-            {
-                $match: {
-                    company: company,
-                    date: { $gte: startDate, $lte: endDate }
-                }
-            },
-            { $unwind: '$products' },
-            {
-                $lookup: {
-                    from: 'products',
-                    localField: 'products.product',
-                    foreignField: '_id',
-                    as: 'productData'
-                }
-            },
-            {
-                $unwind: '$productData'
-            },
-            {
-                $group: {
-                    _id: {
-                        product: '$productData.name',
-                        company: '$company'
-                    },
-                    totalSold: { $sum: '$products.quantity' },
-                    totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.unitPrice'] } }
-                }
-            },
-            {
-                $lookup: {
-                    from: 'companies',
-                    localField: '_id.company',
-                    foreignField: '_id',
-                    as: 'companyData'
-                }
-            },
-            {
-                $unwind: '$companyData'
-            },
-            {
-                $project: {
-                    _id: 0,
-                    product: '$_id.product',
-                    company: '$companyData.name',
-                    totalSold: 1,
-                    totalRevenue: 1
-                }
-            }
-        ]);
+export const getSalesByProduct = async (company: string, startDate: Date, endDate: Date) => {
+    let pipeline: any = [
+      {
+        $match: {
+          companyId: company,
+          date: { $gte: startDate, $lte: endDate }
+        }
+      },
+      { $unwind: '$products' },
+      {
+        $group: {
+          _id: '$products.productId',
+          totalSold: { $sum: '$products.quantity' },
+          totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.unitPrice'] } }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          product: '$_id',
+          totalSold: 1,
+          totalRevenue: 1
+        }
+      }
+    ];
+  
+    const salesByProduct = await Sale.aggregate(pipeline);
+  
+    console.log('\n====== Final Sales By Product Output ======\n', salesByProduct);
+  
+    return salesByProduct;
+  };
+  
 
-        return salesByProduct;
-    } catch (error: any) {
-        throw new Error(`Could not fetch sales by product: ${error.message}`);
-    }
-};
 
 export const scheduleSale = async (company: Types.ObjectId, products: any[], client: string, scheduledDate: Date, adminId: string): Promise<IScheduledSale> => {
     const total = calculateTotalAmount(products) as number;
@@ -208,3 +183,57 @@ export const triggerScheduledSale = async (scheduledSaleId: Types.ObjectId): Pro
 
     return sale;
 };
+export async function getTopProducts(company: any, startDate: Date, endDate: Date) {
+    const results = await Sale.aggregate([
+        {
+            $match: {
+                companyId: company,
+                date: { $gte: startDate, $lte: endDate }
+            }
+        },
+        { $unwind: '$products' },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'products.productId',
+                foreignField: '_id',
+                as: 'productData'
+            }
+        },
+        {
+            $unwind: '$productData'
+        },
+        {
+            $group: {
+                _id: {
+                    product: '$productData.name',
+                    company: '$companyId'
+                },
+                totalSold: { $sum: '$products.quantity' },
+                totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.unitPrice'] } }
+            }
+        },
+        {
+            $lookup: {
+                from: 'companies',
+                localField: '_id.company',
+                foreignField: '_id',
+                as: 'companyData'
+            }
+        },
+        {
+            $unwind: '$companyData'
+        },
+        {
+            $project: {
+                _id: 0,
+                product: '$_id.product',
+                company: '$companyData.name',
+                totalSold: 1,
+                totalRevenue: 1
+            }
+        }
+    ]);
+
+    return results;
+}

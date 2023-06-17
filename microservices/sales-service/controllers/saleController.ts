@@ -66,7 +66,7 @@ class SaleController {
             const cacheKey = `salesByProduct:${company}:${startDate.toISOString()}:${endDate.toISOString()}`;
             const cachedData = await getAsync(cacheKey);
 
-            if (cachedData) {
+            if (cachedData && process.env.NODE_ENV === 'dssevelopment') {
                 const salesByProduct = JSON.parse(cachedData);
                 res.json(salesByProduct);
                 logger.info(`Sales by product found. (Retrieved from cache)`);
@@ -93,6 +93,20 @@ class SaleController {
         } catch (error: any) {
             logger.error(`Error in scheduleSale: ${error.message}`);
             next(new HttpError(400, error.message));
+        }
+    }
+
+    async getTopProducts(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const company = req.user.company;
+            const startDate = new Date(req.query.startDate as string);
+            const endDate = new Date(req.query.endDate as string);
+            const topProducts = await saleService.getTopProducts(company, startDate, endDate);
+            res.json(topProducts);
+            logger.info(`Top products found`);
+        } catch (error: any) {
+            logger.error(`Error in getTopProducts: ${error.message}`);
+            next(new HttpError(500, error.message));
         }
     }
 }
