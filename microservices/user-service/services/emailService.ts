@@ -12,11 +12,6 @@ interface SendInvitationEmailOptions {
     invitationLink: string;
 }
 
-interface SendProductSoldEmailOptions {
-    to: string;
-    productId: string;
-}
-
 export async function sendInvitationEmail({ to, company, invitationLink }: SendInvitationEmailOptions): Promise<void> {
     const companyFromDB = await Company.findById(company).select('name');
     if (!companyFromDB) {
@@ -38,17 +33,46 @@ export async function sendInvitationEmail({ to, company, invitationLink }: SendI
         });
 }
 
-export async function sendProductSoldEmail({ to, productId }: SendProductSoldEmailOptions): Promise<void> {
+export async function sendProductSoldEmail(productId: string): Promise<void> {
     const productFromDB: { name: string } = await axios.get(`http://localhost:3000/api/products/${productId}`);
     if (!productFromDB) {
         throw new Error('Product not found');
     }
+
+    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`);
+
     const msg = {
-        to,
+        to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
         subject: 'Product Sold Notification',
         text: `The product "${productFromDB.name}" has been sold. Check the inventory for stock details.`
     };
+
+    await sgMail
+        .send(msg)
+        .then(() => {
+            console.log('Email sent');
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
+
+export async function sendProductPurchasedEmail(productId: string): Promise<void> {
+    const productFromDB: { name: string } = await axios.get(`http://localhost:3000/api/products/${productId}`);
+    if (!productFromDB) {
+        throw new Error('Product not found');
+    }
+
+    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`);
+
+    const msg = {
+        to: subscribedAdmins.data,
+        from: 'gioghisellini@gmail.com',
+        subject: 'Product Purchased Notification',
+        text: `The product "${productFromDB.name}" has been purchased. Check the inventory for stock details.`
+    };
+
     await sgMail
         .send(msg)
         .then(() => {

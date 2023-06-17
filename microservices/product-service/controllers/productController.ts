@@ -195,7 +195,7 @@ class ProductController {
 
     async isSubscribedToProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const adminId = req.params.adminId;
+            const adminId = req.user.idUser;
             const productId = req.params.productId;
             const isSubscribed = await productService.isSubscribedToProduct(adminId, productId);
             res.json({ isSubscribed });
@@ -214,6 +214,18 @@ class ProductController {
             res.json({ message: 'Decrease successful.' });
         } catch (error: any) {
             logger.error(`Error in decreaseProductStock: ${error.message}`);
+            next(new HttpError(400, error.message));
+        }
+    }
+
+    async getSubscribedAdminsToProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const productId = req.params.productId;
+            const subscribedAdmins = await productService.getSubscribedAdminsToProduct(productId);
+            res.json(subscribedAdmins);
+            logger.info(`Admins subscribed to product`);
+        } catch (error: any) {
+            logger.error(`Error in checkSubscribedAdminsToProduct: ${error.message}`);
             next(new HttpError(400, error.message));
         }
     }

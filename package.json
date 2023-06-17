@@ -10,7 +10,8 @@
     "test": "jest",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "node --max-old-space-size=4096 dist/app.js",
-    "start:frontend": "cd ../197396-211753-205650-Frontend/Frontend/GestionInventario && npm start"
+    "start:frontend": "cd ../197396-211753-205650-Frontend/Frontend/GestionInventario && npm start",
+    "start:all": "concurrently \"npm run --prefix microservices/company-service start:dev\" \"npm run --prefix microservices/health-service start:dev\" \"npm run --prefix microservices/product-service start:dev\" \"npm run --prefix microservices/provider-service start:dev\" \"npm run --prefix microservices/purchase-service start:dev\" \"npm run --prefix microservices/sales-service start:dev\" \"npm run --prefix microservices/upload-service start:dev\" \"npm run --prefix microservices/user-service start:dev\""
   },
   "keywords": [],
   "author": "",

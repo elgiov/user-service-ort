@@ -16,5 +16,6 @@ router.get('/', auth.verifyToken, productController.getProductsByCompany);
 router.delete('/:name', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.deleteProduct);
 router.post('/subscribe/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.subscribeToProduct);
 router.delete('/unsubscribe/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.unsubscribeFromProduct);
-router.get('/is-subscribed/:productId/:adminId', productController.isSubscribedToProduct);
+router.get('/is-subscribed/:productId', productController.isSubscribedToProduct);
+router.get('/subscribed-admins/:productId', auth.verifyToken, auth.authRolePermissions(['ADMIN']), productController.getSubscribedAdminsToProduct);
 export default router;

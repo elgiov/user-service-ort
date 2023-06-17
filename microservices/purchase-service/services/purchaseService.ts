@@ -3,6 +3,7 @@ import { IProduct } from '../models/product';
 import { Product } from '../models/product';
 import { Purchase } from '../models/purchase';
 import { ObjectId, Types } from 'mongoose';
+import { sendProductPurchasedEmail } from '../../user-service/services/emailService';
 import axios from 'axios';
 
 const baseApi = axios.create({
@@ -43,8 +44,16 @@ export const createPurchase = async (provider: string, products: { productId: st
         const purchase = new Purchase({ provider, products: purchaseProducts, total, company, date: today });
         await purchase.save();
 
+        for (const product of purchaseProducts) {
+            await notifyAdmins(product.product);
+        }
         return purchase;
     } catch (error: any) {
         throw new Error(`Could not create purchase: ${error.message}`);
     }
+};
+
+const notifyAdmins = async (productId: string): Promise<void> => {
+    await sendProductPurchasedEmail(productId);
+    console.log(`Sending email about product ${productId}`);
 };
