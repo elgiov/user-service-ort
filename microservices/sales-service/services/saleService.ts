@@ -123,12 +123,10 @@ export const getSales = async (company: string, page: number, limit: number, sta
 
 export const getSalesByProduct = async (company: string, startDate: Date, endDate: Date): Promise<any> => {
     try {
-        const companyObjectId = new Types.ObjectId(company);
-
         const salesByProduct = await Sale.aggregate([
             {
                 $match: {
-                    company: companyObjectId,
+                    company: company,
                     date: { $gte: startDate, $lte: endDate }
                 }
             },

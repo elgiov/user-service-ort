@@ -61,7 +61,7 @@ class SaleController {
         try {
             const startDate = new Date(req.query.startDate as string);
             const endDate = new Date(req.query.endDate as string);
-            const company = req.params.company;
+            const company = req.user.company;
 
             const cacheKey = `salesByProduct:${company}:${startDate.toISOString()}:${endDate.toISOString()}`;
             const cachedData = await getAsync(cacheKey);
