@@ -4,6 +4,7 @@ export interface IProductSale extends Document {
     productId: string; 
     quantity: number;
     unitPrice: number;
+    product?: any;
 }
 
 export interface ISale extends Document {
@@ -18,7 +19,8 @@ export const ProductSaleSchema = new Schema<IProductSale>(
     {
         productId: { type: String, required: true },
         quantity: { type: Number, required: true },
-        unitPrice: { type: Number, required: true }
+        unitPrice: { type: Number, required: true },
+        product: { type: Object }
     }
 );
 

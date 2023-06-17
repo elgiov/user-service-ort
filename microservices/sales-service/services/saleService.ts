@@ -72,10 +72,9 @@ const notifyAdmins = async (productId: string): Promise<void> => {
 
 export const getSales = async (company: string, page: number, limit: number, startDate: string, endDate: string) => {
     try {
-        const companyObjectId = new Types.ObjectId(company);
 
         const totalSales = await Sale.countDocuments({
-            company: companyObjectId,
+            companyId: company,
             date: {
                 $gte: startDate,
                 $lte: endDate
@@ -84,17 +83,29 @@ export const getSales = async (company: string, page: number, limit: number, sta
 
         const totalPages = Math.ceil(totalSales / limit);
 
-        const sales = await Sale.find({
-            company: companyObjectId,
+        let sales = await Sale.find({
+            companyId: company,
             date: {
                 $gte: startDate,
                 $lte: endDate
             }
         })
-            .populate('products.product')
             .skip((page - 1) * limit)
             .limit(limit)
             .sort({ date: -1 });
+
+        sales = await Promise.all(
+            sales.map(async (sale) => {
+                sale.products = await Promise.all(
+                    sale.products.map(async (productSale) => {
+                        const response = await axios.get(`http://localhost:3000/api/products/byId/${productSale.productId}`);
+                        productSale.product = response.data;
+                        return productSale;
+                    })
+                );
+                return sale;
+            })
+        );
 
         return {
             sales,

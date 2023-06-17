@@ -79,7 +79,7 @@ const getSales = (company, page, limit, startDate, endDate) => __awaiter(void 0,
                 $lte: endDate
             }
         })
-            .populate('products.product')
+            .populate('products.productId')
             .skip((page - 1) * limit)
             .limit(limit)
             .sort({ date: -1 });
