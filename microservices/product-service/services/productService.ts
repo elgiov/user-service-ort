@@ -126,3 +126,14 @@ export async function isSubscribedToProduct(adminId: any, productId: string) {
         throw new Error('Could not check if subscribed to product');
     }
 }
+export async function getSubscribedAdminsToProduct(productId: string) {
+    try {
+        const productSubscriptions = await ProductSubscription.find({ productId });
+        if (!productSubscriptions) {
+            return [];
+        }
+        return productSubscriptions.map((productSubscription) => productSubscription.adminId);
+    } catch (error) {
+        throw new Error('Could not check if subscribed to product');
+    }
+}

@@ -1,0 +1,70 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start User Service",
+            "type": "shell",
+            "command": "npm run start:dev",
+            "options": {
+                "cwd": "${workspaceFolder}/microservices/user-service"
+            }
+        },
+        {
+            "label": "Start Provider Service",
+            "type": "shell",
+            "command": "npm run start:dev",
+            "options": {
+                "cwd": "${workspaceFolder}/microservices/provider-service"
+            }
+        },
+        {
+            "label": "Start Company Service",
+            "type": "shell",
+            "command": "npm run start:dev",
+            "options": {
+                "cwd": "${workspaceFolder}/microservices/company-service"
+            }
+        },
+        {
+            "label": "Start Health Service",
+            "type": "shell",
+            "command": "npm run start:dev",
+            "options": {
+                "cwd": "${workspaceFolder}/microservices/health-service"
+            }
+        },
+        {
+            "label": "Start Product Service",
+            "type": "shell",
+            "command": "npm run start:dev",
+            "options": {
+                "cwd": "${workspaceFolder}/microservices/product-service"
+            }
+        },
+        {
+            "label": "Start Purchase Service",
+            "type": "shell",
+            "command": "npm run start:dev",
+            "options": {
+                "cwd": "${workspaceFolder}/microservices/purchase-service"
+            }
+        },
+        {
+            "label": "Start Sales Service",
+            "type": "shell",
+            "command": "npm run start:dev",
+            "options": {
+                "cwd": "${workspaceFolder}/microservices/sales-service"
+            }
+        },
+        {
+            "label": "Start All Services",
+            "type": "shell",
+            "command": "",
+            "dependsOn": ["Start User Service", "Start Provider Service", "Start Company Service", "Start Health Service", "Start Product Service", "Start Purchase Service", "Start Sales Service"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        }
+    ]
+}
