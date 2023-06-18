@@ -150,14 +150,14 @@ class ProductController {
                 logger.info(`Top products found for company "${company}" (from cache)`);
             } else {
                 try {
-                    const response = await axios.get(`http://localhost:3001/api/sales/top-products/${company}`);
+                    const response = await axios.get(`http://localhost:3001/api/sales/topProducts/${company}`);
                     const topProducts = response.data;
                     res.json(topProducts);
-                    logger.info(`Top products found for company "${company}" (from Sales microservice)`);
+                    logger.info(`Top products found for company "${company}" (from Product microservice)`);
 
                     await setexAsync(cacheKey, 60, JSON.stringify(topProducts));
                 } catch (error: any) {
-                    logger.error(`Error in getTopProducts: Could not fetch top products from Sales microservice: ${error.message}`);
+                    logger.error(`Error in getTopProducts: Could not fetch top products from Product microservice: ${error.message}`);
                     next(new HttpError(500, error.message));
                 }
             }

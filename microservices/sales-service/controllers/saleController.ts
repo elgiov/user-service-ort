@@ -98,10 +98,8 @@ class SaleController {
 
     async getTopProducts(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const company = req.user.company;
-            const startDate = new Date(req.query.startDate as string);
-            const endDate = new Date(req.query.endDate as string);
-            const topProducts = await saleService.getTopProducts(company, startDate, endDate);
+            const company = req.params.company;
+            const topProducts = await saleService.getTopProducts(company);
             res.json(topProducts);
             logger.info(`Top products found`);
         } catch (error: any) {

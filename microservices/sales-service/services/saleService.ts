@@ -122,38 +122,33 @@ export const getSales = async (company: string, page: number, limit: number, sta
 
 export const getSalesByProduct = async (company: string, startDate: Date, endDate: Date) => {
     let pipeline: any = [
-      {
-        $match: {
-          companyId: company,
-          date: { $gte: startDate, $lte: endDate }
+        {
+            $match: {
+                companyId: company,
+                date: { $gte: startDate, $lte: endDate }
+            }
+        },
+        { $unwind: '$products' },
+        {
+            $group: {
+                _id: '$products.productId',
+                totalSold: { $sum: '$products.quantity' },
+                totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.unitPrice'] } }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                product: '$_id',
+                totalSold: 1,
+                totalRevenue: 1
+            }
         }
-      },
-      { $unwind: '$products' },
-      {
-        $group: {
-          _id: '$products.productId',
-          totalSold: { $sum: '$products.quantity' },
-          totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.unitPrice'] } }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          product: '$_id',
-          totalSold: 1,
-          totalRevenue: 1
-        }
-      }
     ];
-  
-    const salesByProduct = await Sale.aggregate(pipeline);
-  
-    console.log('\n====== Final Sales By Product Output ======\n', salesByProduct);
-  
-    return salesByProduct;
-  };
-  
 
+    const salesByProduct = await Sale.aggregate(pipeline);
+    return salesByProduct;
+};
 
 export const scheduleSale = async (company: Types.ObjectId, products: any[], client: string, scheduledDate: Date, adminId: string): Promise<IScheduledSale> => {
     const total = calculateTotalAmount(products) as number;
@@ -183,54 +178,18 @@ export const triggerScheduledSale = async (scheduledSaleId: Types.ObjectId): Pro
 
     return sale;
 };
-export async function getTopProducts(company: any, startDate: Date, endDate: Date) {
+export async function getTopProducts(company: any) {
     const results = await Sale.aggregate([
-        {
-            $match: {
-                companyId: company,
-                date: { $gte: startDate, $lte: endDate }
-            }
-        },
+        { $match: { companyId: company } },
         { $unwind: '$products' },
-        {
-            $lookup: {
-                from: 'products',
-                localField: 'products.productId',
-                foreignField: '_id',
-                as: 'productData'
-            }
-        },
-        {
-            $unwind: '$productData'
-        },
-        {
-            $group: {
-                _id: {
-                    product: '$productData.name',
-                    company: '$companyId'
-                },
-                totalSold: { $sum: '$products.quantity' },
-                totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.unitPrice'] } }
-            }
-        },
-        {
-            $lookup: {
-                from: 'companies',
-                localField: '_id.company',
-                foreignField: '_id',
-                as: 'companyData'
-            }
-        },
-        {
-            $unwind: '$companyData'
-        },
+        { $group: { _id: '$products.productId', totalSold: { $sum: '$products.quantity' } } },
+        { $sort: { totalSold: -1 } },
+        { $limit: 3 },
         {
             $project: {
                 _id: 0,
-                product: '$_id.product',
-                company: '$companyData.name',
-                totalSold: 1,
-                totalRevenue: 1
+                productId: '$_id',
+                totalSold: 1
             }
         }
     ]);
