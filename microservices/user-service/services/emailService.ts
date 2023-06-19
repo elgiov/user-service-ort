@@ -33,13 +33,17 @@ export async function sendInvitationEmail({ to, company, invitationLink }: SendI
         });
 }
 
-export async function sendProductSoldEmail(productId: string): Promise<void> {
-    const productFromDB: { name: string } = await axios.get(`http://localhost:3000/api/products/${productId}`);
+export async function sendProductSoldEmail(productId: string, token: string): Promise<void> {
+    const headers = {
+        Authorization: token
+    };
+
+    const productFromDB: { name: string } = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
     if (!productFromDB) {
         throw new Error('Product not found');
     }
 
-    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`);
+    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`,{headers});
 
     const msg = {
         to: subscribedAdmins.data,
