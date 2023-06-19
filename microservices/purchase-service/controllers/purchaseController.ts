@@ -8,6 +8,8 @@ import { Types } from 'mongoose';
 import { Purchase } from '../models/purchase';
 import { getAsync, setexAsync } from '../../../shared-middleware/src/cache';
 import env from 'dotenv';
+import moment from 'moment';
+
 env.config();
 const CACHE_TTL_SECONDS = 60;
 
@@ -63,6 +65,51 @@ class PurchaseController {
             }
         } catch (error: any) {
             logger.error(`Error in getPurchasesForProvider: ${error.message}`);
+            next(new HttpError(500, error.message));
+        }
+    }
+
+    async getPurchasesForCompany(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            let company = req.params.companyId;
+            if (!company) {
+                logger.error('No company provided');
+                throw new HttpError(401, 'No company provided');
+            }
+
+            const startDate = req.query.startDate
+                ? moment(req.query.startDate as string, 'YYYY-MM-DD')
+                      .toISOString()
+                      .substring(0, 10)
+                : moment.utc().startOf('month').toISOString().substring(0, 10);
+            const endDate = req.query.endDate
+                ? moment(req.query.endDate as string, 'YYYY-MM-DD')
+                      .toISOString()
+                      .substring(0, 10)
+                : moment.utc().add(1, 'days').toISOString().substring(0, 10);
+
+            const cacheKey = `purchases:${company}:${startDate.toString()}:${endDate.toString()}`;
+            const cachedData = await getAsync(cacheKey);
+
+            if (cachedData) {
+                const purchases = JSON.parse(cachedData);
+                res.json(purchases);
+                logger.info(`Purchases for company ${company}. (Retrieved from cache)`);
+            } else {
+                const purchases = await Purchase.find({
+                    company: company,
+                    date: { $gte: startDate, $lte: endDate }
+                })
+                    .populate({ path: 'products.product', model: 'Product', select: 'name' })
+                    .exec();
+
+                await setexAsync(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(purchases));
+
+                res.json(purchases);
+                logger.info(`Purchases for company ${company}. (Retrieved from database)`);
+            }
+        } catch (error: any) {
+            logger.error(`Error in getPurchasesForCompany: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }

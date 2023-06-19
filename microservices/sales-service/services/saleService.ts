@@ -197,3 +197,25 @@ export async function getTopProducts(company: any) {
 
     return results;
 }
+
+export const getAllSalesNoPagination = async (company: string, startDate: string, endDate: string) => {
+    try {
+        const sales = await Sale.find({
+            companyId: company,
+            date: {
+                $gte: startDate,
+                $lte: endDate
+            }
+        }).sort({ date: -1 });
+
+        return sales;
+    } catch (error: any) {
+        throw new Error(`Could not fetch sales: ${error.message}`);
+    }
+};
+
+export async function getAllSalesByCompanyId(company: string, startDate: string, endDate: string) {
+    const sales = await getAllSalesNoPagination(company, startDate, endDate);
+
+    return sales;
+}

@@ -58,6 +58,35 @@ class SaleController {
             next(new HttpError(500, error.message));
         }
     }
+    
+    async getSalesByCompanyId(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const company = req.params.id;
+            if (!company) {
+                logger.error('No company provided');
+                return next(new HttpError(401, 'No company provided'));
+            }
+
+            const startDate = req.query.startDate
+                ? moment(req.query.startDate as string, 'YYYY-MM-DD')
+                        .toISOString()
+                        .substring(0, 10)
+                : moment.utc().startOf('month').toISOString().substring(0, 10);
+            const endDate = req.query.endDate
+                ? moment(req.query.endDate as string, 'YYYY-MM-DD') 
+                        .toISOString()
+                        .substring(0, 10)   
+                : moment.utc().add(1, 'days').toISOString().substring(0, 10);   
+
+            const sales = await saleService.getAllSalesByCompanyId(company, startDate, endDate);
+
+            res.json(sales);
+            logger.info(`All sales found`);
+        } catch (error: any) {
+            logger.error(`Error in getAllSalesByCompanyId: ${error.message}`);
+            next(new HttpError(500, error.message));
+        }
+    }
 
     async getSalesByProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {

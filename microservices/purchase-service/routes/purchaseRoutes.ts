@@ -7,5 +7,7 @@ const router = Router();
 router.post('', purchaseController.createPurchase);
 //@ts-ignore
 router.get('/:providerId', auth.verifyToken, purchaseController.getPurchasesForProvider);
+//@ts-ignore
+router.get('/by-company/:companyId', purchaseController.getPurchasesForCompany);
 
 export default router;
