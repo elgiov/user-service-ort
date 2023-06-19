@@ -1,6 +1,5 @@
 import sgMail from '@sendgrid/mail';
 import axios from 'axios';
-import { Company } from '../models/company';
 
 const SENDGRID_API_KEY = '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';
 
@@ -13,10 +12,11 @@ interface SendInvitationEmailOptions {
 }
 
 export async function sendInvitationEmail({ to, company, invitationLink }: SendInvitationEmailOptions): Promise<void> {
-    const companyFromDB = await Company.findById(company).select('name');
-    if (!companyFromDB) {
+    const companyById = await axios.get(`http://localhost:3002/api/companies/${company}`);
+    if (!companyById) {
         throw new Error('Company not found');
     }
+    const companyFromDB = companyById.data;
     const msg = {
         to,
         from: 'gioghisellini@gmail.com',
@@ -81,4 +81,31 @@ export async function sendProductPurchasedEmail(productId: string): Promise<void
         .catch((error) => {
             console.error(error);
         });
+}
+
+export async function sendReportEmail(to: string, pdfBuffer: Buffer): Promise<void> {
+    const attachment = pdfBuffer.toString('base64');
+
+    const msg = {
+        to,
+        from: 'gioghisellini@gmail.com',
+        subject: 'Reporte de ventas y compras',
+        text: 'Encuentre el reporte de ventas y compras adjunto.',
+        attachments: [
+            {
+                content: attachment,
+                filename: 'Report.pdf',
+                type: 'application/pdf',
+                disposition: 'attachment',
+                content_id: 'Report' // Add content_id for the attachment
+            }
+        ]
+    };
+
+    try {
+        await sgMail.send(msg);
+        console.log('Email sent');
+    } catch (error) {
+        console.error(error);
+    }
 }

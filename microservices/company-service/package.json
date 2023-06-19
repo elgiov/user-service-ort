@@ -16,9 +16,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nodemon": "^2.0.22"
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "nodemon": "^2.0.22",
+    "pdfmake": "^0.2.7"
   },
   "devDependencies": {
+    "@types/pdfmake": "^0.2.2",
     "concurrently": "^8.2.0"
   }
 }
