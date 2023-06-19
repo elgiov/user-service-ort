@@ -13,10 +13,12 @@ const CACHE_TTL_SECONDS = 60;
 class SaleController {
     async createSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
+
+            const token = req.headers.authorization!; 
             const company = req.user.company;
-            const adminId = req.user.idUser;
+            //const adminId = req.user.idUser;
             const { products, client } = req.body;
-            const newSale = await saleService.createSale(company, products, client, adminId);
+            const newSale = await saleService.createSale(company, products, client, token);
             res.status(201).json(newSale);
             logger.info(`New sale created`);
         } catch (error: any) {
@@ -113,10 +115,11 @@ class SaleController {
 
     async scheduleSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
+            const token = req.headers.authorization!; 
             const company = req.user.company;
             const adminId = req.user.id;
             const { products, client, scheduledDate } = req.body;
-            const scheduledSale = await saleService.scheduleSale(company, products, client, new Date(scheduledDate), adminId);
+            const scheduledSale = await saleService.scheduleSale(company, products, client, new Date(scheduledDate), adminId,token);
             res.status(201).json(scheduledSale);
             logger.info(`Sale scheduled`);
         } catch (error: any) {
