@@ -128,7 +128,6 @@ export const createReport = async (companyId: string) => {
 
 export const sendReport = async (email: string, report: Buffer) => {
     try {
-        email = 'gioghisellini@gmail.com';
         await sendReportEmail(email, report);
     } catch (error: any) {
         console.error(`Error sending report: ${error.message}`);
