@@ -17,7 +17,8 @@ class PurchaseController {
     async createPurchase(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { provider, products } = req.body;
-            const newPurchase = await createPurchase(provider, products);
+            const token = req.headers.authorization!; 
+            const newPurchase = await createPurchase(provider, products, token);
             await updateInventoryAfterPurchase(products, newPurchase.company);
             res.status(201).json(newPurchase);
             logger.info(`New purchase created`);
