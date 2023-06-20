@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import env from 'dotenv';
+// import env from 'dotenv';
 import * as productService from '../services/productService';
 import { getCompanyById } from '../services/companyService';
 import HttpError from '../errors/httpError';
@@ -10,7 +10,7 @@ import { Product } from '../models/product';
 import { Types } from 'mongoose';
 import { logger } from '../config/logger';
 import { getAsync, setexAsync } from '../cache';
-env.config();
+// env.config();
 
 class ProductController {
     async addProduct(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
