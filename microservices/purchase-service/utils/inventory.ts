@@ -1,6 +1,7 @@
 import { ObjectId, Types } from 'mongoose';
 import { Product } from '../models/product';
 import HttpError from '../../../shared-middleware/src/httpError';
+import { sendProductStockEmail } from '../../user-service/services/emailService';
 
 const updateProductInventory = async (productId: string, quantity: number, isSale: boolean, company: string): Promise<void> => {
     const product = await Product.findOne({ _id: productId, company });
@@ -14,6 +15,11 @@ const updateProductInventory = async (productId: string, quantity: number, isSal
 
     product.quantity += isSale ? -quantity : quantity;
     await product.save();
+
+    // Check if product stock is depleted and send an email notification
+    if (product.quantity === 0) {
+        await sendProductStockEmail(product._id.toHexString());
+    }
 };
 
 export const updateInventoryAfterPurchase = async (products: { productId: string; quantity: number }[], company: string): Promise<void> => {

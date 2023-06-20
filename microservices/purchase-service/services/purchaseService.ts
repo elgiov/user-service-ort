@@ -22,7 +22,7 @@ const calculateTotal = (products: { quantity: number; unitPrice: number }[]): nu
     return products.reduce((total, { quantity, unitPrice }) => total + unitPrice * quantity, 0);
 };
 
-export const createPurchase = async (provider: string, products: { productId: string; quantity: number }[], token:string): Promise<IPurchase> => {
+export const createPurchase = async (provider: string, products: { productId: string; quantity: number }[], token: string): Promise<IPurchase> => {
     try {
         const { data } = await baseApi.get(`/id/${provider}`);
         const company = data.company;
@@ -45,7 +45,7 @@ export const createPurchase = async (provider: string, products: { productId: st
         await purchase.save();
 
         for (const product of purchaseProducts) {
-            await notifyAdmins(product.product,token);
+            await notifyAdmins(product.product.toHexString(), token);
         }
         return purchase;
     } catch (error: any) {
@@ -53,7 +53,7 @@ export const createPurchase = async (provider: string, products: { productId: st
     }
 };
 
-const notifyAdmins = async (productId: string, token:string): Promise<void> => {
+const notifyAdmins = async (productId: string, token: string): Promise<void> => {
     await sendProductPurchasedEmail(productId, token);
     console.log(`Sending email about product ${productId}`);
 };

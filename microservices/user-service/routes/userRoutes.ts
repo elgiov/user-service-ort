@@ -11,6 +11,7 @@ router.post('/register/employee', userController.registerEmployee);
 router.post('/login', userController.login);
 router.post('/register', userController.registerUser);
 router.get('/info', auth.verifyToken, userController.infoUser);
+router.get('/byId/:id', userController.infoUserById);
 
 
 export default router;

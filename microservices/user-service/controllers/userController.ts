@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createUser, getUserByEmail } from '../services/userService';
+import { createUser, getUserByEmail, getUserById } from '../services/userService';
 import { UserRole, hashPassword } from '../models/user';
 import { readFileSync } from 'fs';
 import jwt from 'jsonwebtoken';
@@ -88,6 +88,23 @@ class UserController {
             logger.info(`GET info user ${userInfo.name}`);
         } catch (error: any) {
             logger.error(`Error in infoUser: ${error.message}`);
+            next(new HttpError(500, error.message));
+        }
+    }
+
+    async infoUserById(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const user = await getUserById(id);
+            if (!user) {
+                logger.error(`Error in infoUserById: User with id: ${id} not found`);
+                next(new HttpError(404, `User with id: ${id} not found`));
+                return;
+            }
+            res.status(201).json(user);
+            logger.info(`GET info user ${user.name}`);
+        } catch (error: any) {
+            logger.error(`Error in infoUserById: ${error.message}`);
             next(new HttpError(500, error.message));
         }
     }

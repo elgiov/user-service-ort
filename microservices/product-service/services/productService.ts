@@ -2,6 +2,8 @@ import { ObjectId } from 'mongoose';
 import { Product, IProduct } from '../models/product';
 import { uploadToS3 } from '../../upload-service/service/s3-upload';
 import { ProductSubscription } from '../models/productSubscription';
+import axios, { AxiosResponse } from 'axios';
+import { sendProductStockEmail } from '../../user-service/services/emailService';
 
 export const createProduct = async ({ name, description, image, price, quantity, company }: IProduct): Promise<IProduct> => {
     try {
@@ -84,6 +86,11 @@ export const decreaseProductQuantity = async (productId: string, quantity: numbe
 
         product.quantity -= quantity;
         await product.save();
+
+        // Check if product stock is depleted and send an email notification
+        if (product.quantity === 0) {
+            await sendProductStockEmail(product._id.toHexString());
+        }
     } catch (error: any) {
         throw new Error(`Could not decrease quantity for product with id "${productId}": ${error.message}`);
     }
@@ -110,6 +117,23 @@ export async function subscribeToProduct(adminId: any, productId: string) {
     }
 }
 
+export async function subscribeToProductStock(adminId: any, productId: string) {
+    try {
+        const productSubscription = new ProductSubscription({ adminId, productId, isStock: true });
+        await productSubscription.save();
+    } catch (error) {
+        throw new Error('Could not subscribe to product stock');
+    }
+}
+
+export async function unsubscribeFromProductStock(adminId: any, productId: string) {
+    try {
+        await ProductSubscription.findOneAndDelete({ adminId, productId, isStock: true });
+    } catch (error) {
+        throw new Error('Could not unsubscribe from product stock');
+    }
+}
+
 export async function unsubscribeFromProduct(adminId: any, productId: string) {
     try {
         await ProductSubscription.findOneAndDelete({ adminId, productId });
@@ -126,14 +150,71 @@ export async function isSubscribedToProduct(adminId: any, productId: string) {
         throw new Error('Could not check if subscribed to product');
     }
 }
+
+export async function isSubscribedToProductStock(adminId: any, productId: string) {
+    try {
+        const productSubscription = await ProductSubscription.findOne({ adminId, productId, isStock: true });
+        return !!productSubscription;
+    } catch (error) {
+        throw new Error('Could not check if subscribed to product stock');
+    }
+}
+
 export async function getSubscribedAdminsToProduct(productId: string) {
     try {
         const productSubscriptions = await ProductSubscription.find({ productId });
         if (!productSubscriptions) {
             return [];
         }
-        return productSubscriptions.map((productSubscription) => productSubscription.adminId);
+        const adminIds = productSubscriptions.map((productSubscription) => productSubscription.adminId);
+
+        if (adminIds?.length === 0) {
+            return [];
+        }
+
+        const admins = (await Promise.all(adminIds.map((adminId) => getAdminById(adminId)))) as AxiosResponse<any>[];
+
+        if (admins?.length === 0) {
+            return [];
+        }
+
+        const uniqueAdminEmails = [...new Set(admins.map((admin) => admin.data.email))];
+        return uniqueAdminEmails;
     } catch (error) {
         throw new Error('Could not check if subscribed to product');
+    }
+}
+
+export async function getSubscribedAdminsToProductStock(productId: string) {
+    try {
+        const productSubscriptions = await ProductSubscription.find({ productId, isStock: true });
+        if (!productSubscriptions) {
+            return [];
+        }
+        const adminIds = productSubscriptions.map((productSubscription) => productSubscription.adminId);
+
+        if (adminIds?.length === 0) {
+            return [];
+        }
+
+        const admins = (await Promise.all(adminIds.map((adminId) => getAdminById(adminId)))) as AxiosResponse<any>[];
+
+        if (admins?.length === 0) {
+            return [];
+        }
+
+        const uniqueAdminEmails = [...new Set(admins.map((admin) => admin.data.email))];
+        return uniqueAdminEmails;
+    } catch (error) {
+        throw new Error('Could not check if subscribed to product stock');
+    }
+}
+
+async function getAdminById(adminId: string): Promise<any> {
+    try {
+        const admin = await axios.get(`http://localhost:3005/api/users/byId/${adminId}`);
+        return admin;
+    } catch (error) {
+        throw new Error('Could not get admin by id');
     }
 }

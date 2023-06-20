@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail';
-import axios from 'axios';
+import axios, { Axios, AxiosResponse } from 'axios';
 
 const SENDGRID_API_KEY = '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';
 
@@ -38,18 +38,18 @@ export async function sendProductSoldEmail(productId: string, token: string): Pr
         Authorization: token
     };
 
-    const productFromDB: { name: string } = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
+    const productFromDB: { data: any } = (await axios.get(`http://localhost:3000/api/products/byId/${productId}`)) as AxiosResponse;
     if (!productFromDB) {
         throw new Error('Product not found');
     }
 
-    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`,{headers});
-
+    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`, { headers });
+    subscribedAdmins.data.push('gioghisellini@gmail.com');
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
         subject: 'Product Sold Notification',
-        text: `The product "${productFromDB.name}" has been sold. Check the inventory for stock details.`
+        text: `The product "${productFromDB.data.name}" has been sold. Check the inventory for stock details.`
     };
 
     await sgMail
@@ -62,23 +62,48 @@ export async function sendProductSoldEmail(productId: string, token: string): Pr
         });
 }
 
-export async function sendProductPurchasedEmail(productId: string,token: string): Promise<void> {
-    const headers = {
-        Authorization: token
-    };
-
-    const productFromDB: { name: string } = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
+export async function sendProductStockEmail(productId: string) {
+    const productFromDB: { data: any } = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
     if (!productFromDB) {
         throw new Error('Product not found');
     }
 
-    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`,{headers});
+    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins-stock/${productId}`);
+    subscribedAdmins.data.push('gioghisellini@gmail.com');
+    const msg = {
+        to: subscribedAdmins.data,
+        from: 'gioghisellini@gmail.com',
+        subject: 'Product Out of Stock Notification',
+        text: `The product "${productFromDB.data.name}" is out of stock. Please restock the inventory.`
+    };
 
+    await sgMail
+        .send(msg)
+        .then(() => {
+            console.log('Email sent');
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
+
+export async function sendProductPurchasedEmail(productId: string, token: string): Promise<void> {
+    const headers = {
+        Authorization: token
+    };
+
+    const productFromDB: { data: any } = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
+    if (!productFromDB) {
+        throw new Error('Product not found');
+    }
+
+    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`, { headers });
+    subscribedAdmins.data.push('gioghisellini@gmail.com');
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
         subject: 'Product Purchased Notification',
-        text: `The product "${productFromDB.name}" has been purchased. Check the inventory for stock details.`
+        text: `The product "${productFromDB.data.name}" has been purchased. Check the inventory for stock details.`
     };
 
     await sgMail
