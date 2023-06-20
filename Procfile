@@ -1,0 +1,1 @@
+user-service: cd microservices/user-service && npm start
