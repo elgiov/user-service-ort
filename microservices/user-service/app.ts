@@ -8,7 +8,7 @@ import axios from 'axios';
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+const port = process.env.PORT || 3005;
 app.use(function (req, res, next) {
     //Enabling CORS
     res.header('Access-Control-Allow-Origin', '*');
@@ -42,4 +42,4 @@ app.use('/api/invites', inviteRoutes);
 
 connectDB();
 
-app.listen(3005, () => console.log('User service is listening on port 3005'));
+app.listen(port, () => console.log('User service is listening on port 3005'));
