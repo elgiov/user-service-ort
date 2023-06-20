@@ -213,7 +213,7 @@ export async function getSubscribedAdminsToProductStock(productId: string) {
 
 async function getAdminById(adminId: string): Promise<any> {
     try {
-        const admin = await axios.get(`http://localhost:3005/api/users/byId/${adminId}`);
+        const admin = await axios.get(`https://user-service-gestion-inv-69bef55793e1.herokuapp.com/api/users/byId/${adminId}`);
         return admin;
     } catch (error) {
         throw new Error('Could not get admin by id');

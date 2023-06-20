@@ -34,7 +34,7 @@ app.use((req, res, next) => {
             date: new Date()
         };
 
-        axios.post('http://127.0.0.1:5000/log', logData).catch((err) => console.error(err));
+        axios.post('https://monitoring-service-gestion-inv-839ff0fe87a7.herokuapp.com/log', logData).catch((err) => console.error(err));
     });
 
     next();

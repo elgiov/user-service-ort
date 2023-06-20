@@ -7,7 +7,7 @@ import axios from 'axios';
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+const port = process.env.PORT || 3004;
 app.use(function (req, res, next) {
     //Enabling CORS
     res.header('Access-Control-Allow-Origin', '*');
@@ -34,7 +34,7 @@ app.use((req, res, next) => {
             date: new Date()
         };
 
-        axios.post('http://127.0.0.1:5000/log', logData).catch((err) => console.error(err));
+        axios.post('https://monitoring-service-gestion-inv-839ff0fe87a7.herokuapp.com/log', logData).catch((err) => console.error(err));
     });
 
     next();
@@ -43,4 +43,4 @@ app.use((req, res, next) => {
 app.use('/api/purchases', purchaseRoutes);
 connectDB();
 
-app.listen(3004, () => console.log('Purchase service is listening on port 3004'));
+app.listen(port, () => console.log('Purchase service is listening on port 3004'));

@@ -7,7 +7,7 @@ import { sendProductSoldEmail } from '../../user-service/services/emailService';
 
 const findProductById = async (productId: string): Promise<{ id: string; price: number }> => {
     try {
-        const response = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
+        const response = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/byId/${productId}`);
         return { id: response.data._id, price: response.data.price };
     } catch (error) {
         throw new Error(`Product with id "${productId}" not found`);
@@ -16,7 +16,7 @@ const findProductById = async (productId: string): Promise<{ id: string; price: 
 
 const decreaseProductQuantity = async (productId: string, quantity: number): Promise<void> => {
     try {
-        await axios.post(`http://localhost:3000/api/products/decrease-quantity/${productId}`, { quantity });
+        await axios.post(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/decrease-quantity/${productId}`, { quantity });
     } catch (error) {
         throw new Error(`Insufficient stock for product with id "${productId}"`);
     }
@@ -98,7 +98,7 @@ export const getSales = async (company: string, page: number, limit: number, sta
             sales.map(async (sale) => {
                 sale.products = await Promise.all(
                     sale.products.map(async (productSale) => {
-                        const response = await axios.get(`http://localhost:3000/api/products/byId/${productSale.productId}`);
+                        const response = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/byId/${productSale.productId}`);
                         productSale.product = response.data;
                         return productSale;
                     })

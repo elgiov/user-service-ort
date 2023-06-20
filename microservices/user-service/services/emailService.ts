@@ -12,7 +12,7 @@ interface SendInvitationEmailOptions {
 }
 
 export async function sendInvitationEmail({ to, company, invitationLink }: SendInvitationEmailOptions): Promise<void> {
-    const companyById = await axios.get(`http://localhost:3002/api/companies/${company}`);
+    const companyById = await axios.get(`https://company-service-gestion-inv-a517252dd275.herokuapp.com/api/companies/${company}`);
     if (!companyById) {
         throw new Error('Company not found');
     }
@@ -38,12 +38,12 @@ export async function sendProductSoldEmail(productId: string, token: string): Pr
         Authorization: token
     };
 
-    const productFromDB: { data: any } = (await axios.get(`http://localhost:3000/api/products/byId/${productId}`)) as AxiosResponse;
+    const productFromDB: { data: any } = (await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/byId/${productId}`)) as AxiosResponse;
     if (!productFromDB) {
         throw new Error('Product not found');
     }
 
-    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`, { headers });
+    const subscribedAdmins = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/subscribed-admins/${productId}`, { headers });
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
@@ -62,12 +62,12 @@ export async function sendProductSoldEmail(productId: string, token: string): Pr
 }
 
 export async function sendProductStockEmail(productId: string) {
-    const productFromDB: { data: any } = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
+    const productFromDB: { data: any } = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/byId/${productId}`);
     if (!productFromDB) {
         throw new Error('Product not found');
     }
 
-    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins-stock/${productId}`);
+    const subscribedAdmins = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/subscribed-admins-stock/${productId}`);
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
@@ -90,12 +90,12 @@ export async function sendProductPurchasedEmail(productId: string, token: string
         Authorization: token
     };
 
-    const productFromDB: { data: any } = await axios.get(`http://localhost:3000/api/products/byId/${productId}`);
+    const productFromDB: { data: any } = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/byId/${productId}`);
     if (!productFromDB) {
         throw new Error('Product not found');
     }
 
-    const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`, { headers });
+    const subscribedAdmins = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/subscribed-admins/${productId}`, { headers });
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',

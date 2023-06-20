@@ -47,8 +47,8 @@ export const getCompanies = async (): Promise<ICompany[]> => {
 export const createReport = async (companyId: string) => {
     try {
         const [sales, purchases] = await Promise.all([
-            axios.get(`http://localhost:3001/api/sales/by-company/${companyId}`),
-            axios.get(`http://localhost:3004/api/purchases/by-company/${companyId}`)
+            axios.get(`https://sales-service-gestion-inv-bdbf7ceab368.herokuapp.com/api/sales/by-company/${companyId}`),
+            axios.get(`https://purchase-service-gestion-inv-1b26af04340b.herokuapp.com/api/purchases/by-company/${companyId}`)
         ]);
 
         const salesData = sales.data.sort((a: { total: number }, b: { total: number }) => b.total - a.total);
@@ -57,7 +57,7 @@ export const createReport = async (companyId: string) => {
         const getProductDetails = async (data: any) => {
             for (let entry of data) {
                 for (let product of entry.products) {
-                    const productDetails = await axios.get(`http://localhost:3000/api/products/byId/${product.productId || product.product._id}`);
+                    const productDetails = await axios.get(`https://product-service-gestion-inv-a517252dd275.herokuapp.com/api/products/byId/${product.productId || product.product._id}`);
                     product.name = productDetails.data.name; // add the product name to the product object
                 }
             }

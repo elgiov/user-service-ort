@@ -7,7 +7,7 @@ import { sendProductPurchasedEmail } from '../../user-service/services/emailServ
 import axios from 'axios';
 
 const baseApi = axios.create({
-    baseURL: `http://localhost:3003/api/providers`,
+    baseURL: `https://provider-service-gestion-inv-768e628673da.herokuapp.com/api/providers`,
     proxy: false
 });
 

@@ -150,7 +150,7 @@ class ProductController {
                 logger.info(`Top products found for company "${company}" (from cache)`);
             } else {
                 try {
-                    const response = await axios.get(`http://localhost:3001/api/sales/topProducts/${company}`);
+                    const response = await axios.get(`https://sales-service-gestion-inv-bdbf7ceab368.herokuapp.com/api/sales/topProducts/${company}`);
                     const topProducts = response.data;
                     res.json(topProducts);
                     logger.info(`Top products found for company "${company}" (from Product microservice)`);

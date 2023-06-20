@@ -12,7 +12,7 @@ import axios from 'axios';
 env.config();
 
 const baseApi = axios.create({
-    baseURL: `http://localhost:3002/api/companies`,
+    baseURL: `https://company-service-gestion-inv-a517252dd275.herokuapp.com/api/companies`,
     proxy: false
 })
 
