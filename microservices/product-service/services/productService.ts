@@ -145,7 +145,7 @@ export async function unsubscribeFromProduct(adminId: any, productId: string) {
 
 export async function isSubscribedToProduct(adminId: any, productId: string) {
     try {
-        const productSubscription = await ProductSubscription.findOne({ adminId, productId });
+        const productSubscription = await ProductSubscription.findOne({ adminId, productId, isStock: false });
         return !!productSubscription;
     } catch (error) {
         throw new Error('Could not check if subscribed to product');
