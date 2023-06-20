@@ -232,6 +232,19 @@ class ProductController {
         }
     }
 
+    async isSubscribedToProductStock(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const adminId = req.user.idUser;
+            const productId = req.params.productId;
+            const isSubscribed = await productService.isSubscribedToProductStock(adminId, productId);
+            res.json({ isSubscribed });
+            logger.info(`Admin is subscribed to product stock`);
+        } catch (error: any) {
+            logger.error(`Error in isSubscribedToProductStock: ${error.message}`);
+            next(new HttpError(400, error.message));
+        }
+    }
+
     async decreaseProductStock (req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const productId = req.params.id;
