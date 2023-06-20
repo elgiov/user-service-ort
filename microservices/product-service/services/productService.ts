@@ -136,7 +136,8 @@ export async function unsubscribeFromProductStock(adminId: any, productId: strin
 
 export async function unsubscribeFromProduct(adminId: any, productId: string) {
     try {
-        await ProductSubscription.findOneAndDelete({ adminId, productId });
+        const result = ProductSubscription.findOneAndDelete({ adminId, productId });
+        return result;
     } catch (error) {
         throw new Error('Could not unsubscribe from product');
     }
@@ -162,7 +163,7 @@ export async function isSubscribedToProductStock(adminId: any, productId: string
 
 export async function getSubscribedAdminsToProduct(productId: string) {
     try {
-        const productSubscriptions = await ProductSubscription.find({ productId });
+        const productSubscriptions = await ProductSubscription.find({ productId, isStock: false });
         if (!productSubscriptions) {
             return [];
         }

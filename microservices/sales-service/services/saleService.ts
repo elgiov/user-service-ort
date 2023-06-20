@@ -66,8 +66,8 @@ export const createSale = async (
     }
 };
 
-const notifyAdmins = async (productId: string, token:string): Promise<void> => {
-    await sendProductSoldEmail(productId,token);
+const notifyAdmins = async (productId: string, token: string): Promise<void> => {
+    await sendProductSoldEmail(productId, token);
     console.log(`Sending email about product ${productId}`);
 };
 
@@ -151,19 +151,36 @@ export const getSalesByProduct = async (company: string, startDate: Date, endDat
     return salesByProduct;
 };
 
-export const scheduleSale = async (company: Types.ObjectId, products: any[], client: string, scheduledDate: Date, adminId: string,token: string): Promise<IScheduledSale> => {
-    const total = calculateTotalAmount(products) as number;
+export const scheduleSale = async (company: Types.ObjectId, products: any[], client: string, scheduledDate: Date, adminId: string, token: string): Promise<IScheduledSale> => {
+    const productPromises = products.map(({ productId }) => findProductById(productId));
+    const foundProducts = await Promise.all(productPromises);
+    const saleProducts = foundProducts.map((product, index) => {
+        const { quantity } = products[index];
+        const unitPrice = product.price;
+        return { productId: product.id, quantity, unitPrice };
+    });
+    const total = calculateTotalAmount(saleProducts) as number;
 
     for (const product of products) {
         await decreaseProductQuantity(product.productId, product.quantity);
     }
 
-    const scheduledSale = new ScheduledSale({ company, total, products, date: new Date(), client, scheduledDate, adminId });
+    const scheduledSale = new ScheduledSale({ companyId: company, total, products: saleProducts, date: new Date(), client, scheduledDate, adminId });
     await scheduledSale.save();
 
-    schedule.scheduleJob(scheduledDate, async () => {
-        await triggerScheduledSale(scheduledSale.id,token);
-    });
+    const currentDay = new Date(); // get the current date and time
+    currentDay.setHours(0, 0, 0, 0); // set hours, minutes, seconds and milliseconds to zero to ignore time
+    const scheduledDay = new Date(scheduledDate);
+    scheduledDay.setHours(0, 0, 0, 0); // do the same for the scheduled date
+
+    if (currentDay.getTime() === scheduledDay.getTime()) {
+        // check if the scheduled date is the same as the current date
+        await triggerScheduledSale(scheduledSale.id, token);
+    } else {
+        schedule.scheduleJob(scheduledDate, async () => {
+            await triggerScheduledSale(scheduledSale.id, token);
+        });
+    }
 
     return scheduledSale;
 };
@@ -173,7 +190,7 @@ export const triggerScheduledSale = async (scheduledSaleId: Types.ObjectId, toke
     if (!scheduledSale) throw new Error('Scheduled sale not found');
 
     const { companyId, products, client } = scheduledSale;
-    const sale = await createSale(new Types.ObjectId(companyId), products, client,token, true, false);
+    const sale = await createSale(new Types.ObjectId(companyId), products, client, token, true, false);
 
     await ScheduledSale.deleteOne({ _id: scheduledSaleId });
 

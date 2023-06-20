@@ -55,7 +55,6 @@ class PurchaseController {
                     provider: providerObjectId,
                     date: { $gte: startDate, $lte: endDate }
                 })
-                    .populate({ path: 'provider', model: 'Provider', select: 'name' })
                     .populate({ path: 'products.product', model: 'Product', select: 'name' })
                     .exec();
 

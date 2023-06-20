@@ -13,8 +13,7 @@ const CACHE_TTL_SECONDS = 60;
 class SaleController {
     async createSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-
-            const token = req.headers.authorization!; 
+            const token = req.headers.authorization!;
             const company = req.user.company;
             //const adminId = req.user.idUser;
             const { products, client } = req.body;
@@ -58,7 +57,7 @@ class SaleController {
             next(new HttpError(500, error.message));
         }
     }
-    
+
     async getSalesByCompanyId(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
             const company = req.params.id;
@@ -69,14 +68,14 @@ class SaleController {
 
             const startDate = req.query.startDate
                 ? moment(req.query.startDate as string, 'YYYY-MM-DD')
-                        .toISOString()
-                        .substring(0, 10)
+                      .toISOString()
+                      .substring(0, 10)
                 : moment.utc().startOf('month').toISOString().substring(0, 10);
             const endDate = req.query.endDate
-                ? moment(req.query.endDate as string, 'YYYY-MM-DD') 
-                        .toISOString()
-                        .substring(0, 10)   
-                : moment.utc().add(1, 'days').toISOString().substring(0, 10);   
+                ? moment(req.query.endDate as string, 'YYYY-MM-DD')
+                      .toISOString()
+                      .substring(0, 10)
+                : moment.utc().add(1, 'days').toISOString().substring(0, 10);
 
             const sales = await saleService.getAllSalesByCompanyId(company, startDate, endDate);
 
@@ -115,11 +114,11 @@ class SaleController {
 
     async scheduleSale(req: CustomRequest<any>, res: Response, next: NextFunction): Promise<void> {
         try {
-            const token = req.headers.authorization!; 
+            const token = req.headers.authorization!;
             const company = req.user.company;
-            const adminId = req.user.id;
-            const { products, client, scheduledDate } = req.body;
-            const scheduledSale = await saleService.scheduleSale(company, products, client, new Date(scheduledDate), adminId,token);
+            const adminId = req.user.idUser;
+            const { products, client, scheduleDate } = req.body;
+            const scheduledSale = await saleService.scheduleSale(company, products, client, new Date(scheduleDate), adminId, token);
             res.status(201).json(scheduledSale);
             logger.info(`Sale scheduled`);
         } catch (error: any) {

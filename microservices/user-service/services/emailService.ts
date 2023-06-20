@@ -44,7 +44,6 @@ export async function sendProductSoldEmail(productId: string, token: string): Pr
     }
 
     const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`, { headers });
-    subscribedAdmins.data.push('gioghisellini@gmail.com');
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
@@ -69,7 +68,6 @@ export async function sendProductStockEmail(productId: string) {
     }
 
     const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins-stock/${productId}`);
-    subscribedAdmins.data.push('gioghisellini@gmail.com');
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
@@ -98,7 +96,6 @@ export async function sendProductPurchasedEmail(productId: string, token: string
     }
 
     const subscribedAdmins = await axios.get(`http://localhost:3000/api/products/subscribed-admins/${productId}`, { headers });
-    subscribedAdmins.data.push('gioghisellini@gmail.com');
     const msg = {
         to: subscribedAdmins.data,
         from: 'gioghisellini@gmail.com',
